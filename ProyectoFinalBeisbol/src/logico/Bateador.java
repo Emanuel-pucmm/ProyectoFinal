@@ -37,4 +37,9 @@ public class Bateador extends Jugador {
     public void actualizarEstadisticas(BateadorEstadisticas nuevasStats) {
         this.statsBateador = nuevasStats;
     }
+    
+    @Override
+    public String getTipoJugador() {
+        return "Bateador";
+    }
 }

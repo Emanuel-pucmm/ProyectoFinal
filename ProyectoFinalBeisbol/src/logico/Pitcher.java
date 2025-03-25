@@ -54,4 +54,8 @@ public class Pitcher extends Jugador {
     public ArrayList<String> obtenerLanzamientos() {
         return new ArrayList<>(this.tiposLanzamientos);
     }
+    
+    public String getTipoJugador() {
+        return "Lanzador";
+    }
 }

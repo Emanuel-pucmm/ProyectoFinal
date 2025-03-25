@@ -3,7 +3,7 @@ package logico;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class Jugador {
+public abstract class Jugador {
     // Atributos
     protected String nombre;
     protected LocalDate fechaNacimiento;
@@ -95,4 +95,5 @@ public class Jugador {
             this.listaLesiones.add(lesion);
         }
     }
+    public abstract String getTipoJugador();
 }
