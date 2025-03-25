@@ -12,6 +12,17 @@ public class Calendario {
     public Calendario() {
         this.partidos = new ArrayList<>();
     }
+    
+    // Getter y Setter
+    public ArrayList<Partido> getPartidos() {
+        return new ArrayList<>(partidos); // Devuelve copia para proteger encapsulamiento
+    }
+
+    public void setPartidos(ArrayList<Partido> partidos) {
+        if (partidos != null) {
+            this.partidos = new ArrayList<>(partidos);
+        }
+    }
 
     // Métodos según UML
     public void agregarPartido(Partido partido) {
@@ -29,23 +40,6 @@ public class Calendario {
         return null;
     }
 
-    public void generarCalendario(boolean completar) {
-        // Lógica para generar el calendario
-        if (completar) {
-            // Generar calendario completo
-        } else {
-            // Generar calendario básico
-        }
-    }
-
-    // Getter y Setter
-    public ArrayList<Partido> getPartidos() {
-        return new ArrayList<>(partidos); // Devuelve copia para proteger encapsulamiento
-    }
-
-    public void setPartidos(ArrayList<Partido> partidos) {
-        if (partidos != null) {
-            this.partidos = new ArrayList<>(partidos);
-        }
-    }
+   
 }
+

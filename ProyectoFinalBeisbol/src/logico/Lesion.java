@@ -65,14 +65,4 @@ public class Lesion {
         return !hoy.isBefore(fechaInicio) && !hoy.isAfter(fechaFin);
     }
 
-    // Método toString
-    @Override
-    public String toString() {
-        return "Lesion{" +
-                "tipo='" + tipo + '\'' +
-                ", fechaInicio=" + fechaInicio +
-                ", fechaFin=" + fechaFin +
-                ", diasRecuperacion=" + diasRecuperacion +
-                '}';
-    }
 }

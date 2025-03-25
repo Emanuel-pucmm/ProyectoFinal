@@ -58,8 +58,4 @@ public class Partido {
         }
     }
 
-    
-    public Resultado generarEstadisticasPartido() {
-        return this.resultadoFinal;  // Devuelve directamente el objeto Resultado existente
-    }
 }
