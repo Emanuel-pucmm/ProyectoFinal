@@ -85,12 +85,4 @@ public class Resultado {
         this.erroresVisita += erroresVisita;
     }
 
-    // Método para obtener resumen como String
-    public String obtenerResumen() {
-        return String.format(
-            "Local: %d hits, %d carreras, %d errores | Visitante: %d hits, %d carreras, %d errores",
-            hitsLocal, carrerasLocal, erroresLocal,
-            hitsVisita, carrerasVisita, erroresVisita
-        );
-    }
 }

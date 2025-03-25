@@ -91,11 +91,11 @@ public class PitcherEstadisticas {
 	    }
 
 	    // Método de cálculo de efectividad
-	    public double calcEfectividad() {
+	    public float calcEfectividad() {
 	        if (entradasLanzadas == 0) {
-	            return 0.0; // Evitar división por cero
+	            return 0.0f; // Evitar división por cero
 	        }
-	        return (carrerasPermitidas * 9.0) / entradasLanzadas;
+	        return (carrerasPermitidas * 9.0f) / entradasLanzadas;
 	    }
 	
 }

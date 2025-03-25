@@ -58,21 +58,8 @@ public class Partido {
         }
     }
 
-    // Método para generar estadísticas (devuelve String formateado)
-    public String generarEstadisticasPartido() {
-        if (resultadoFinal == null) {
-            return "Partido sin resultado registrado";
-        }
-        
-        return String.format(
-            "Fecha: %s | Local: %s %d - Visitante: %s %d | Ganador: %s",
-            fecha.toString(),
-            equipoLocal.getNombre(),
-            resultadoFinal.getCarrerasLocal(),
-            equipoVisita.getNombre(),
-            resultadoFinal.getCarrerasVisita(),
-            resultadoFinal.getCarrerasLocal() > resultadoFinal.getCarrerasVisita() 
-                ? equipoLocal.getNombre() : equipoVisita.getNombre()
-        );
+    
+    public Resultado generarEstadisticasPartido() {
+        return this.resultadoFinal;  // Devuelve directamente el objeto Resultado existente
     }
 }
