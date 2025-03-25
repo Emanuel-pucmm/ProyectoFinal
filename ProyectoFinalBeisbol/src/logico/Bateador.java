@@ -1,15 +1,17 @@
 package logico;
 
+import java.time.LocalDate;
+
 public class Bateador extends Jugador {
     private String posicion;
     private BateadorEstadisticas statsBateador;
 
     public Bateador(String nombre, LocalDate fechaNacimiento, String edad, 
                    String nacionalidad, String manoDominante, LocalDate fechaDebut, 
-                   double altura, String posicion) {
+                   float altura, String posicion) {
         super(nombre, fechaNacimiento, edad, nacionalidad, manoDominante, fechaDebut, altura);
         this.posicion = posicion;
-        this.statsBateador = new BateadorEstadisticas();
+        this.statsBateador = new BateadorEstadisticas(0, 0, 0, 0, 0);
     }
 
     public String getPosicion() {

@@ -1,5 +1,8 @@
 package logico;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+
 public class Pitcher extends Jugador {
     private String tipoLanzador;
     private ArrayList<String> tiposLanzamientos;
@@ -7,11 +10,11 @@ public class Pitcher extends Jugador {
 
     public Pitcher(String nombre, LocalDate fechaNacimiento, String edad, 
                  String nacionalidad, String manoDominante, LocalDate fechaDebut, 
-                 double altura, String tipoLanzador) {
+                 float altura, String tipoLanzador) {
         super(nombre, fechaNacimiento, edad, nacionalidad, manoDominante, fechaDebut, altura);
         this.tipoLanzador = tipoLanzador;
         this.tiposLanzamientos = new ArrayList<>();
-        this.statsPitcher = new PitcherEstadisticas();
+        this.statsPitcher = new PitcherEstadisticas(0, 0, 0, 0, 0, 0);
     }
 
     public String getTipoLanzador() {

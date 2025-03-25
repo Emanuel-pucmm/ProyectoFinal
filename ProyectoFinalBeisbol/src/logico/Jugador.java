@@ -5,14 +5,14 @@ import java.util.ArrayList;
 
 public class Jugador {
     // Atributos
-    private String nombre;
-    private LocalDate fechaNacimiento;
-    private String edad;
-    private String nacionalidad;
-    private String manoDominante;
-    private LocalDate fechaDebut;
-    private double altura;
-    private ArrayList<Lesion> listaLesiones;
+    protected String nombre;
+    protected LocalDate fechaNacimiento;
+    protected String edad;
+    protected String nacionalidad;
+    protected String manoDominante;
+    protected LocalDate fechaDebut;
+    protected double altura;
+    protected ArrayList<Lesion> listaLesiones;
 
     // Constructor
     public Jugador(String nombre, LocalDate fechaNacimiento, String edad, 
