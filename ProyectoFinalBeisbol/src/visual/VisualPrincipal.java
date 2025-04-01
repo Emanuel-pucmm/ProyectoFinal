@@ -2,97 +2,71 @@ package visual;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+
+import logico.*;
 
 public class VisualPrincipal extends JFrame {
-    private JTable tablaJugadores;
-    private JTable tablaEquipos;
+    private SerieNacional serie;
 
     public VisualPrincipal() {
-        configurarVentana();
-        initComponents();
-    }
+        serie = new SerieNacional(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        setTitle("Sistema de Gestión de Béisbol");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-    private void configurarVentana() {
-        setTitle("Gestión de Béisbol");
-        setSize(800, 500);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-    }
+        JMenuBar menuBar = new JMenuBar();
 
-    private void initComponents() {
-        // Panel principal
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        
-        // Encabezado azul
-        JPanel headerPanel = new JPanel();
-        headerPanel.setBackground(new Color(12, 35, 64));
-        headerPanel.setPreferredSize(new Dimension(100, 40));
-        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        // Menú Jugadores
+        JMenu mnJugadores = new JMenu("Jugadores");
+        JMenuItem mntmRegistrarJugador = new JMenuItem("Registrar Jugador");
+        mntmRegistrarJugador.addActionListener(e -> new RegistrarJugador(serie).setVisible(true));
+        mnJugadores.add(mntmRegistrarJugador);
 
-        // Panel de pestañas
-        JTabbedPane tabbedPane = new JTabbedPane();
-        
-        // Pestaña de Jugadores
-        tabbedPane.addTab("Jugadores", crearPanelJugadores());
-        
-        // Pestaña de Equipos
-        tabbedPane.addTab("Equipos", crearPanelEquipos());
-        
-        mainPanel.add(tabbedPane, BorderLayout.CENTER);
-        getContentPane().add(mainPanel);
-    }
+        JMenuItem mntmListarJugadores = new JMenuItem("Listar Jugadores");
+        mntmListarJugadores.addActionListener(e -> new ListadoJugadores(serie).setVisible(true));
+        mnJugadores.add(mntmListarJugadores);
 
-    private JPanel crearPanelJugadores() {
-        JPanel panel = new JPanel(new BorderLayout());
-        
-        // Botones
-        JPanel panelBotones = new JPanel();
-        JButton button = new JButton("Agregar");
-        button.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent arg0) {
-        	}
-        });
-        panelBotones.add(button);
-        panelBotones.add(new JButton("Editar"));
-        panelBotones.add(new JButton("Eliminar"));
-        
-        panel.add(panelBotones, BorderLayout.NORTH);
-        
-        // Tabla de jugadores
-        String[] columnas = {"Nombre", "Posición", "Edad"};
-        Object[][] datos = {
-            {"Juan Pérez", "Bateador", "28"},
-            {"Carlos Martínez", "Lanzador", "30"}
-        };
-        
-        tablaJugadores = new JTable(datos, columnas);
-        panel.add(new JScrollPane(tablaJugadores), BorderLayout.CENTER);
-        
-        return panel;
-    }
+        JMenuItem mntmRegistrarLesion = new JMenuItem("Registrar Lesión");
+        mntmRegistrarLesion.addActionListener(e -> new RegistrarLesion(serie).setVisible(true));
+        mnJugadores.add(mntmRegistrarLesion);
 
-    private JPanel crearPanelEquipos() {
-        JPanel panel = new JPanel(new BorderLayout());
-        
-        // Tabla de equipos
-        String[] columnas = {"Nombre", "Estadio", "JG", "JP"};
-        Object[][] datos = {
-            {"Yankees", "Yankee Stadium", "95", "67"},
-            {"Red Sox", "Fenway Park", "84", "78"}
-        };
-        
-        tablaEquipos = new JTable(datos, columnas);
-        panel.add(new JScrollPane(tablaEquipos), BorderLayout.CENTER);
-        
-        return panel;
+        JMenuItem mntmListarLesiones = new JMenuItem("Listar Lesiones");
+        mntmListarLesiones.addActionListener(e -> new ListadoLesiones(serie).setVisible(true));
+        mnJugadores.add(mntmListarLesiones);
+        menuBar.add(mnJugadores);
+
+        // Menú Equipos
+        JMenu mnEquipos = new JMenu("Equipos");
+        JMenuItem mntmRegistrarEquipo = new JMenuItem("Registrar Equipo");
+        mntmRegistrarEquipo.addActionListener(e -> new RegistrarEquipo(serie).setVisible(true));
+        mnEquipos.add(mntmRegistrarEquipo);
+
+        JMenuItem mntmListarEquipos = new JMenuItem("Listar Equipos");
+        mntmListarEquipos.addActionListener(e -> new ListadoEquipos(serie).setVisible(true));
+        mnEquipos.add(mntmListarEquipos);
+        menuBar.add(mnEquipos);
+
+        // Menú Partidos
+        JMenu mnPartidos = new JMenu("Partidos");
+        JMenuItem mntmSimularPartido = new JMenuItem("Simular Partido");
+        mntmSimularPartido.addActionListener(e -> new SimularPartido(serie).setVisible(true));
+        mnPartidos.add(mntmSimularPartido);
+
+        JMenuItem mntmTablaPosiciones = new JMenuItem("Tabla de Posiciones");
+        mntmTablaPosiciones.addActionListener(e -> new TablaPosiciones(serie).setVisible(true));
+        mnPartidos.add(mntmTablaPosiciones);
+        menuBar.add(mnPartidos);
+
+        setJMenuBar(menuBar);
+
+        JLabel lblBanner = new JLabel(new ImageIcon("banner_beisbol.jpg"));
+        lblBanner.setHorizontalAlignment(SwingConstants.CENTER);
+        add(lblBanner, BorderLayout.CENTER);
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new VisualPrincipal().setVisible(true);
-        });
+        EventQueue.invokeLater(() -> new VisualPrincipal().setVisible(true));
     }
 }

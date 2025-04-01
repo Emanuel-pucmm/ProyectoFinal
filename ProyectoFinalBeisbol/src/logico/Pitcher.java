@@ -10,7 +10,7 @@ public class Pitcher extends Jugador {
 
     public Pitcher(String nombre, LocalDate fechaNacimiento, String edad, 
      String nacionalidad, String manoDominante, LocalDate fechaDebut, 
-     float altura, String tipoLanzador) {
+    float altura, String tipoLanzador) {
         super(nombre, fechaNacimiento, edad, nacionalidad, manoDominante, fechaDebut, altura);
         this.tipoLanzador = tipoLanzador;
         this.tiposLanzamientos = new ArrayList<>();
