@@ -1,54 +1,57 @@
 package logico;
 
-import java.time.LocalDate;
+import java.time.*;
 
 public class Partido {
-    // Atributos
     private LocalDate fecha;
     private Equipo equipoLocal;
     private Equipo equipoVisita;
-    private Resultado resultadoFinal;
+    private Resultado resultado;
+    
+    public Partido(LocalDate fecha, Equipo equipoLocal, Equipo equipoVisita, Resultado resultado) {
+		super();
+		this.fecha = fecha;
+		this.equipoLocal = equipoLocal;
+		this.equipoVisita = equipoVisita;
+		this.resultado = resultado;
+	}
 
-    // Constructor
-    public Partido(LocalDate fecha, Equipo equipoLocal, Equipo equipoVisita) {
-        this.fecha = fecha;
-        this.equipoLocal = equipoLocal;
-        this.equipoVisita = equipoVisita;
-        this.resultadoFinal = null; // Inicialmente sin resultado
-    }
+   
 
-    // Getters y Setters
-    public LocalDate getFecha() {
-        return fecha;
-    }
+	public LocalDate getFecha() {
+		return fecha;
+	}
 
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
+	public void setFecha(LocalDate fecha) {
+		this.fecha = fecha;
+	}
 
-    public Equipo getEquipoLocal() {
-        return equipoLocal;
-    }
+	public Equipo getEquipoLocal() {
+		return equipoLocal;
+	}
 
-    public Equipo getEquipoVisita() {
-        return equipoVisita;
-    }
+	public void setEquipoLocal(Equipo equipoLocal) {
+		this.equipoLocal = equipoLocal;
+	}
 
-    public Resultado getResultadoFinal() {
-        return resultadoFinal;
-    }
+	public Equipo getEquipoVisita() {
+		return equipoVisita;
+	}
 
-    // Método para asignar equipos
-    public void asignarEquipos(Equipo local, Equipo visita) {
-        this.equipoLocal = local;
-        this.equipoVisita = visita;
-    }
+	public void setEquipoVisita(Equipo equipoVisita) {
+		this.equipoVisita = equipoVisita;
+	}
 
-    // Método para registrar resultado
+	public Resultado getResultado() {
+		return resultado;
+	}
+
+	public void setResultado(Resultado resultado) {
+		this.resultado = resultado;
+	}
+	 // Nuevo método para registrar resultado
     public void registrarResultado(int carrerasLocal, int carrerasVisita) {
-        this.resultadoFinal = new Resultado(carrerasLocal, carrerasVisita, carrerasVisita, carrerasVisita, carrerasVisita, carrerasVisita);
-        
-        // Actualizar records de equipos
+        this.resultado = new Resultado(carrerasLocal, carrerasVisita, carrerasVisita, carrerasVisita, carrerasVisita, carrerasVisita);
         if (carrerasLocal > carrerasVisita) {
             equipoLocal.actualizarRecord(1, 0);
             equipoVisita.actualizarRecord(0, 1);
@@ -57,5 +60,5 @@ public class Partido {
             equipoVisita.actualizarRecord(1, 0);
         }
     }
-
+	
 }

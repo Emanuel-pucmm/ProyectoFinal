@@ -13,12 +13,24 @@ public class EstadisticasPartido extends JDialog {
     private DefaultTableModel modelLocal, modelVisita;
     private JLabel lblResultado;
     private int carrerasLocal = 0, carrerasVisita = 0;
+    private boolean simulacionAutomatica = false;
 
     public EstadisticasPartido(SerieNacional serie, Equipo local, Equipo visita) {
+        this(serie, local, visita, false);
+    }
+
+    public EstadisticasPartido(SerieNacional serie, Equipo local, Equipo visita, boolean simulacionAutomatica) {
         this.serie = serie;
         this.local = local;
         this.visita = visita;
+        this.simulacionAutomatica = simulacionAutomatica;
         
+        if (!simulacionAutomatica) {
+            initUI();
+        }
+    }
+
+    private void initUI() {
         setTitle("Partido: " + local.getNombre() + " vs " + visita.getNombre());
         setSize(900, 600);
         setLocationRelativeTo(null);
@@ -102,7 +114,7 @@ public class EstadisticasPartido extends JDialog {
         }
     }
 
-    private void simularInning() {
+    public void simularInning() {
         Random rand = new Random();
         int hitsLocal = rand.nextInt(5);
         int hitsVisita = rand.nextInt(5);
@@ -115,9 +127,15 @@ public class EstadisticasPartido extends JDialog {
         carrerasLocal += hitsLocal / 3;
         carrerasVisita += hitsVisita / 3;
 
-        lblResultado.setText("Resultado: " + carrerasLocal + " - " + carrerasVisita);
-        actualizarTabla(modelLocal, local);
-        actualizarTabla(modelVisita, visita);
+        if (lblResultado != null) {
+            lblResultado.setText("Resultado: " + carrerasLocal + " - " + carrerasVisita);
+        }
+        if (modelLocal != null) {
+            actualizarTabla(modelLocal, local);
+        }
+        if (modelVisita != null) {
+            actualizarTabla(modelVisita, visita);
+        }
     }
 
     private void actualizarEstadisticas(Equipo equipo, int hits) {
@@ -133,19 +151,34 @@ public class EstadisticasPartido extends JDialog {
         }
     }
 
-    private void finalizarPartido() {
+    public void finalizarPartido() {
         // Actualizar records
         if (carrerasLocal > carrerasVisita) {
             local.actualizarRecord(1, 0);
             visita.actualizarRecord(0, 1);
-        } else {
+        } else if (carrerasVisita > carrerasLocal) {
             local.actualizarRecord(0, 1);
             visita.actualizarRecord(1, 0);
+        } else {
+            // Empate - simular innings extra hasta que haya un ganador
+            simularInning();
+            finalizarPartido();
+            return;
         }
 
-        JOptionPane.showMessageDialog(this, "Partido finalizado!\nResultado: " + 
-            local.getNombre() + " " + carrerasLocal + " - " + 
-            visita.getNombre() + " " + carrerasVisita);
-        dispose();
+        if (!simulacionAutomatica) {
+            JOptionPane.showMessageDialog(this, "Partido finalizado!\nResultado: " + 
+                local.getNombre() + " " + carrerasLocal + " - " + 
+                visita.getNombre() + " " + carrerasVisita);
+            dispose();
+        }
+    }
+
+    public int getCarrerasLocal() {
+        return carrerasLocal;
+    }
+
+    public int getCarrerasVisita() {
+        return carrerasVisita;
     }
 }
