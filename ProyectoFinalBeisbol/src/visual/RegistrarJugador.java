@@ -13,7 +13,7 @@ import logico.*;
 public class RegistrarJugador extends JDialog {
     private JTextField txtNombre, txtNacionalidad;
     private JComboBox<String> cbTipo, cbMano, cbPosicion;
-    private JComboBox<Equipo> cbEquipo;        // Nuevo combo para equipo
+    private JComboBox<Equipo> cbEquipo;        
     private JSpinner spinnerAltura;
     private JFormattedTextField txtFechaNac;
     private JLabel lblEdad;
@@ -21,30 +21,22 @@ public class RegistrarJugador extends JDialog {
 
     // Posibles posiciones
     private static final String[] POSICIONES_BATEADOR = {
-        "Catcher",
-        "Primera Base",
-        "Segunda Base",
-        "Tercera Base",
-        "Shortstop",
-        "Jardinero Izquierdo",
-        "Jardinero Central",
-        "Jardinero Derecho"
+        "Catcher", "Primera Base", "Segunda Base", "Tercera Base",
+        "Shortstop", "Jardinero Izquierdo", "Jardinero Central", "Jardinero Derecho"
     };
 
     private static final String[] POSICIONES_PITCHER = {
-        "Abridor",
-        "Relevista",
-        "Cerrador"
+        "Abridor", "Relevista", "Cerrador"
     };
 
     public RegistrarJugador(SerieNacional serie) {
         this.serie = serie;
         setTitle("Registrar Jugador");
-        setSize(450, 450);  // Ajusta altura para el nuevo campo
+        setSize(450, 450); 
         setLocationRelativeTo(null);
         setModal(true);
 
-        // Ahora tendremos 10 filas (en lugar de 9)
+        // 10 filas para incluir el combo de equipos
         JPanel panel = new JPanel(new GridLayout(10, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -53,22 +45,21 @@ public class RegistrarJugador extends JDialog {
         txtNombre = new JTextField();
         panel.add(txtNombre);
 
-        // Fecha de nacimiento (dd/MM/yyyy)
+        // ================= FECHA DE NACIMIENTO ====================
         panel.add(new JLabel("Fecha Nacimiento (dd/MM/yyyy):"));
         txtFechaNac = new JFormattedTextField();
-
         // Formateador para dd/MM/yyyy
         DateFormatter dateFormatter = new DateFormatter(new SimpleDateFormat("dd/MM/yyyy"));
         txtFechaNac.setFormatterFactory(new DefaultFormatterFactory(dateFormatter));
 
         // Fecha por defecto hoy
-        String fechaPorDefecto = LocalDate.now()
-                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String fechaPorDefecto = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         txtFechaNac.setText(fechaPorDefecto);
 
-        // Listener para calcular la edad
+        // Listener para calcular edad al cambiar
         txtFechaNac.addPropertyChangeListener("value", e -> calcularEdad());
         panel.add(txtFechaNac);
+        // =========================================================
 
         // Edad
         panel.add(new JLabel("Edad:"));
@@ -95,12 +86,12 @@ public class RegistrarJugador extends JDialog {
         spinnerAltura = new JSpinner(new SpinnerNumberModel(1.70, 1.50, 2.20, 0.01));
         panel.add(spinnerAltura);
 
-        // Posición/Tipo de lanzador
+        // Posición/Tipo lanzador
         panel.add(new JLabel("Posición/Tipo Lanzador:"));
-        cbPosicion = new JComboBox<>(POSICIONES_BATEADOR); // por defecto Bateador
+        cbPosicion = new JComboBox<>(POSICIONES_BATEADOR); // Por defecto "Bateador"
         panel.add(cbPosicion);
 
-        // Listener para cambiar el combo según Bateador/Lanzador
+        // Actualiza el combo de Posiciones al cambiar el tipo
         cbTipo.addActionListener(e -> {
             if (cbTipo.getSelectedItem().equals("Bateador")) {
                 cbPosicion.setModel(new DefaultComboBoxModel<>(POSICIONES_BATEADOR));
@@ -109,15 +100,15 @@ public class RegistrarJugador extends JDialog {
             }
         });
 
-        // ================== NUEVO CAMPO: Equipo al que pertenece ==================
+        // ============== EQUIPO AL QUE PERTENECE ===============
         panel.add(new JLabel("Equipo al que pertenece:"));
         cbEquipo = new JComboBox<>();
-        // Llenamos el combo con los equipos registrados en la serie
+        // Llenar combo con equipos
         for (Equipo eq : serie.getListEquipos()) {
             cbEquipo.addItem(eq);
         }
         panel.add(cbEquipo);
-        // ==========================================================================
+        // =======================================================
 
         // Botones
         JButton btnRegistrar = new JButton("Registrar");
@@ -134,97 +125,134 @@ public class RegistrarJugador extends JDialog {
         add(panelBotones, BorderLayout.SOUTH);
     }
 
-    // Calcula la edad en base a la fecha de nacimiento
+    // Calcula la edad basado en el texto de la fecha
     private void calcularEdad() {
         try {
             String fechaTexto = txtFechaNac.getText().trim();
-            LocalDate fechaNac = LocalDate.parse(
-                fechaTexto,
-                DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            );
+            LocalDate fechaNac = LocalDate.parse(fechaTexto, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             int edad = Period.between(fechaNac, LocalDate.now()).getYears();
             lblEdad.setText(String.valueOf(edad));
         } catch (Exception e) {
+            // Si hay error (fecha mal formateada), edad = 0
             lblEdad.setText("0");
         }
     }
 
-    // Registra el jugador
     private void registrarJugador() {
-        try {
-            // Parsear la fecha con dd/MM/yyyy
-            String fechaTexto = txtFechaNac.getText().trim();
-            LocalDate fechaNac = LocalDate.parse(
-                fechaTexto,
-                DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            );
-
-            String edad = lblEdad.getText();
-            String nombre = txtNombre.getText().trim();
-            String nacionalidad = txtNacionalidad.getText().trim();
-            String manoDominante = (String) cbMano.getSelectedItem();
-            float altura = (float) spinnerAltura.getValue();
-            String posicion = (String) cbPosicion.getSelectedItem();
-
-            // Validar campos obligatorios
-            if (nombre.isEmpty() || nacionalidad.isEmpty() || posicion.isEmpty()) {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Complete todos los campos",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-                );
-                return;
-            }
-
-            // Creamos el Jugador (Bateador o Pitcher)
-            Jugador jugador;
-            if (cbTipo.getSelectedItem().equals("Bateador")) {
-                jugador = new Bateador(
-                    nombre,
-                    fechaNac,
-                    edad,
-                    nacionalidad,
-                    manoDominante,
-                    LocalDate.now(),
-                    altura,
-                    posicion
-                );
-            } else {
-                jugador = new Pitcher(
-                    nombre,
-                    fechaNac,
-                    edad,
-                    nacionalidad,
-                    manoDominante,
-                    LocalDate.now(),
-                    altura,
-                    posicion
-                );
-            }
-
-            // Lo agregamos a la Serie (como antes)
-            serie.agregarJugador(jugador);
-
-            // ========== NUEVO: Asociar el jugador al equipo seleccionado ==========
-            Equipo equipoSeleccionado = (Equipo) cbEquipo.getSelectedItem();
-            if (equipoSeleccionado != null) {
-                // Añadimos el jugador al equipo. 
-                // Sustituye "getJugadores()" por tu método real si se llama distinto.
-                equipoSeleccionado.getJugadores().add(jugador);
-            }
-            // ======================================================================
-
-            JOptionPane.showMessageDialog(this, "¡Jugador registrado exitosamente!");
-            dispose();
-
-        } catch (Exception e) {
+        // 1) Validar si hay equipos en la lista
+        if (cbEquipo.getItemCount() == 0) {
             JOptionPane.showMessageDialog(
                 this,
-                "Error en los datos ingresados",
+                "No hay equipos registrados. Registre un equipo primero.",
                 "Error",
                 JOptionPane.ERROR_MESSAGE
             );
+            return;
         }
+
+        // 2) Extraer datos del formulario
+        String nombre = txtNombre.getText().trim();
+        String nacionalidad = txtNacionalidad.getText().trim();
+        String manoDominante = (String) cbMano.getSelectedItem();
+        float altura = (float) spinnerAltura.getValue();
+        String posicion = (String) cbPosicion.getSelectedItem();
+        String tipoSeleccionado = (String) cbTipo.getSelectedItem();
+
+        // 3) Validar campos obligatorios
+        if (nombre.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "El campo 'Nombre' está vacío.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+        if (nacionalidad.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "El campo 'Nacionalidad' está vacío.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+        if (posicion == null || posicion.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Debe seleccionar una Posición.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        // 4) Validar fecha (parseo)
+        LocalDate fechaNac;
+        try {
+            String fechaTexto = txtFechaNac.getText().trim();
+            fechaNac = LocalDate.parse(fechaTexto, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Fecha de nacimiento inválida. Use el formato dd/MM/yyyy.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        // 5) Crear el jugador (según tipo)
+        String edad = lblEdad.getText();
+        Jugador jugador;
+        if ("Bateador".equals(tipoSeleccionado)) {
+            jugador = new Bateador(
+                nombre,
+                fechaNac,
+                edad,
+                nacionalidad,
+                manoDominante,
+                LocalDate.now(),
+                altura,
+                posicion
+            );
+        } else {
+            jugador = new Pitcher(
+                nombre,
+                fechaNac,
+                edad,
+                nacionalidad,
+                manoDominante,
+                LocalDate.now(),
+                altura,
+                posicion
+            );
+        }
+
+        // 6) Agregar a la serie
+        serie.agregarJugador(jugador);
+
+        // 7) Asociar el jugador al equipo
+        Equipo equipoSeleccionado = (Equipo) cbEquipo.getSelectedItem();
+        if (equipoSeleccionado == null) {
+            JOptionPane.showMessageDialog(
+                this,
+                "No se ha seleccionado un equipo.",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+        equipoSeleccionado.getJugadores().add(jugador);
+
+        // Éxito - si todo lo anterior se cumplió sin "return", significa que no hubo error
+        JOptionPane.showMessageDialog(
+            this, 
+            "¡Su jugador ha sido registrado exitosamente!", 
+            "Registro Exitoso", 
+            JOptionPane.INFORMATION_MESSAGE
+        );
+        dispose();
     }
 }
+
