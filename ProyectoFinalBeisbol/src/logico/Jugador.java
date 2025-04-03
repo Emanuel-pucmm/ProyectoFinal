@@ -7,7 +7,7 @@ public abstract class Jugador {
     // Atributos
     protected String nombre;
     protected LocalDate fechaNacimiento;
-    protected String edad;
+    protected String edad;  // manejado como String
     protected String nacionalidad;
     protected String manoDominante;
     protected LocalDate fechaDebut;
@@ -15,9 +15,9 @@ public abstract class Jugador {
     protected ArrayList<Lesion> listaLesiones;
 
     // Constructor
-    public Jugador(String nombre, LocalDate fechaNacimiento, String edad, 
-                  String nacionalidad, String manoDominante, LocalDate fechaDebut, 
-                  double altura) {
+    public Jugador(String nombre, LocalDate fechaNacimiento, String edad,
+                   String nacionalidad, String manoDominante, LocalDate fechaDebut,
+                   double altura) {
         this.nombre = nombre;
         this.fechaNacimiento = fechaNacimiento;
         this.edad = edad;
@@ -95,5 +95,8 @@ public abstract class Jugador {
             this.listaLesiones.add(lesion);
         }
     }
+
+    // Método abstracto (para saber si es Bateador o Pitcher)
     public abstract String getTipoJugador();
 }
+
