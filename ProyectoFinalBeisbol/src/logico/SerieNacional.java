@@ -46,10 +46,20 @@ public class SerieNacional {
     }
 	
 	public void agregarJugador(Jugador jugador) {
-        if (jugador != null && !listJugadores.contains(jugador)) {
-            listJugadores.add(jugador);
-        }
-    }
+	    if (jugador == null) return;
+	    
+	    // Si no hay equipos, crea uno automático
+	    if (listEquipos.isEmpty()) {
+	        Equipo equipoAuto = new Equipo("Equipo Automático", null, false, 0, 0, listJugadores, listPartidos);
+	        listEquipos.add(equipoAuto);
+	    }
+	    
+	    // Asigna al primer equipo disponible
+	    if (!listEquipos.get(0).getJugadores().contains(jugador)) {
+	        listEquipos.get(0).getJugadores().add(jugador);
+	        System.out.println("Jugador "+jugador.getNombre()+" registrado en "+listEquipos.get(0).getNombre());
+	    }
+	}
 	
 	public void agregarPartido(Partido partido) {
         if (partido != null && !listPartidos.contains(partido)) {

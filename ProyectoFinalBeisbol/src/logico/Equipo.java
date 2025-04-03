@@ -106,4 +106,8 @@ public class Equipo {
 	        }
 	        return (float) juegosGan / totalJuegos * 100;
 	    }
+	  @Override
+	  public String toString() {
+	      return this.nombre; // Esto hará que aparezca el nombre en el ComboBox
+	  }
 }

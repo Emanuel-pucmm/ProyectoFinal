@@ -108,6 +108,10 @@ public class RegistrarJugador extends JDialog {
             cbEquipo.addItem(eq);
         }
         panel.add(cbEquipo);
+        cbEquipo.removeAllItems(); // Limpiar primero
+        for (Equipo equipo : serie.getListEquipos()) {
+            cbEquipo.addItem(equipo);
+        }
         // =======================================================
 
         // Botones
