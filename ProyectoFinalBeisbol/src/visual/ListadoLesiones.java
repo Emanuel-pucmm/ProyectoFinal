@@ -18,21 +18,41 @@ public class ListadoLesiones extends JDialog {
             new Object[]{"Jugador", "Equipo", "Tipo Lesión", "Fecha Inicio", "Fecha Fin", "Días Restantes"}, 0
         );
 
-        // Llenar datos
-        for (Equipo equipo : serie.getListEquipos()) {
-            for (Jugador jugador : equipo.getJugadores()) {
-                for (Lesion lesion : jugador.getListaLesiones()) {
-                    long diasRestantes = lesion.getFechaFin().toEpochDay() - java.time.LocalDate.now().toEpochDay();
-                    model.addRow(new Object[]{
-                        jugador.getNombre(),
-                        equipo.getNombre(),
-                        lesion.getTipo(),
-                        lesion.getFechaInicio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-                        lesion.getFechaFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-                        diasRestantes > 0 ? diasRestantes : "Recuperado"
-                    });
+        // Llenar datos con verificaciones de null
+        try {
+            if (serie != null && serie.getListEquipos() != null) {
+                for (Equipo equipo : serie.getListEquipos()) {
+                    if (equipo != null && equipo.getJugadores() != null) {
+                        for (Jugador jugador : equipo.getJugadores()) {
+                            if (jugador != null && jugador.getListaLesiones() != null) {
+                                for (Lesion lesion : jugador.getListaLesiones()) {
+                                    if (lesion != null && lesion.getFechaInicio() != null && lesion.getFechaFin() != null) {
+                                        long diasRestantes = lesion.getFechaFin().toEpochDay() - java.time.LocalDate.now().toEpochDay();
+                                        model.addRow(new Object[]{
+                                            jugador.getNombre(),
+                                            equipo.getNombre(),
+                                            lesion.getTipo(),
+                                            lesion.getFechaInicio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                                            lesion.getFechaFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                                            diasRestantes > 0 ? diasRestantes : "Recuperado"
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                "Error al cargar lesiones: " + e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+
+        // Verificar si hay datos
+        if (model.getRowCount() == 0) {
+            model.addRow(new Object[]{"No hay lesiones registradas", "", "", "", "", ""});
         }
 
         // Tabla con scroll

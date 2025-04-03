@@ -261,11 +261,15 @@ public class RegistrarJugador extends JDialog {
                 return;
             }
 
-            // Agregar el jugador al equipo seleccionado
+            // AÑADIR A LA LISTA GENERAL DE JUGADORES DE LA SERIE
+            serie.getListJugadores().add(jugador);
+
+            // AÑADIR AL EQUIPO SELECCIONADO
             equipoSeleccionado.getJugadores().add(jugador);
 
-            // 4. Cierra el diálogo
-            SwingUtilities.invokeLater(this::dispose);
+            // Mensaje de éxito y cierre del diálogo
+            JOptionPane.showMessageDialog(this, "Jugador registrado exitosamente!");
+            dispose();
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(
@@ -277,3 +281,4 @@ public class RegistrarJugador extends JDialog {
         }
     }
 }
+

@@ -65,27 +65,26 @@ public class VisualPrincipal extends JFrame {
     private void configurarBanner() {
         try {
             ImageIcon originalIcon = new ImageIcon(getClass().getResource("/resources/bannerBaseball.jpg"));
-    
-            
+
             // Calcular dimensiones proporcionales
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             int ancho = screenSize.width;
-            int alto = (int) (ancho * 0.2); // Relación de aspecto 5:1
-            
+            int alto = (int) (ancho * 0.2); // Relación de aspecto aproximada
+
             Image imagenEscalada = originalIcon.getImage()
                 .getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
-            
+
             JLabel lblBanner = new JLabel(new ImageIcon(imagenEscalada));
             lblBanner.setHorizontalAlignment(SwingConstants.CENTER);
             add(lblBanner, BorderLayout.NORTH);
-            
+
         } catch (Exception e) {
             JLabel lblError = new JLabel("Banner no disponible - " + e.getMessage());
             lblError.setFont(new Font("Arial", Font.BOLD, 20));
             lblError.setForeground(Color.RED);
             lblError.setHorizontalAlignment(SwingConstants.CENTER);
             add(lblError, BorderLayout.NORTH);
-            
+
             System.err.println("Error cargando banner: " + e.getMessage());
         }
     }
@@ -105,29 +104,26 @@ public class VisualPrincipal extends JFrame {
         }
     }
 
-    // Métodos de verificación
+    // Métodos de verificación (SIMPLIFICADOS)
     private void verificarAntesDeRegistrarLesion() {
+        // Simplificar validación
         if (serie.getListEquipos().isEmpty()) {
-            showError("No hay equipos registrados");
+            showError("Registre al menos un equipo primero");
             return;
         }
         
-        boolean hayJugadores = serie.getListEquipos().stream()
-            .anyMatch(e -> !e.getJugadores().isEmpty());
-            
-        if (!hayJugadores) {
-            showError("No hay jugadores registrados");
-            return;
-        }
-        
+        // Abrir directamente - la ventana manejará sus propias validaciones
         new RegistrarLesion(serie).setVisible(true);
     }
 
     private void verificarAntesDeListarLesiones() {
+        // Simplificar validación
         if (serie.getListEquipos().isEmpty()) {
             showError("No hay equipos registrados");
             return;
         }
+        
+        // Abrir directamente
         new ListadoLesiones(serie).setVisible(true);
     }
 
@@ -178,12 +174,12 @@ public class VisualPrincipal extends JFrame {
 
     private void simularPartidoAutomatico(Equipo local, Equipo visita) {
         EstadisticasPartido partido = new EstadisticasPartido(serie, local, visita, true);
-        
+
         // Simular 9 innings
         for (int i = 0; i < 9; i++) {
             partido.simularInning();
         }
-        
+
         partido.finalizarPartido();
     }
 
