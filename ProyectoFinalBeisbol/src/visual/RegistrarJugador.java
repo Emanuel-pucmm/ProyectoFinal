@@ -44,12 +44,12 @@ public class RegistrarJugador extends JDialog {
         txtNombre = new JTextField();
         panel.add(txtNombre);
 
-        // =================== FECHA NACIMIENTO ===================
+        // =================== FECHA NACIMIENTO (dd/MM/yyyy) ===================
         panel.add(new JLabel("Fecha Nacimiento (dd/MM/yyyy):"));
         txtFechaNac = new JFormattedTextField();
         DateFormatter dateFormatter = new DateFormatter(new SimpleDateFormat("dd/MM/yyyy"));
         txtFechaNac.setFormatterFactory(new DefaultFormatterFactory(dateFormatter));
-        // Fecha por defecto hoy
+        // Fecha por defecto: hoy
         String fechaHoy = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         txtFechaNac.setText(fechaHoy);
         // Listener para recalcular la edad
@@ -98,7 +98,7 @@ public class RegistrarJugador extends JDialog {
         // =================== EQUIPO AL QUE PERTENECE ===================
         panel.add(new JLabel("Equipo al que pertenece:"));
         cbEquipo = new JComboBox<>();
-        // Cargar equipos de la serie:
+        // Cargar equipos de la serie en el ComboBox
         cbEquipo.removeAllItems();
         for (Equipo eq : serie.getListEquipos()) {
             cbEquipo.addItem(eq);
@@ -121,6 +121,10 @@ public class RegistrarJugador extends JDialog {
         add(panelBotones, BorderLayout.SOUTH);
     }
 
+    /**
+     * Calcula la edad a partir de la fecha en txtFechaNac
+     * y la muestra en lblEdad.
+     */
     private void calcularEdad() {
         try {
             String textoFecha = txtFechaNac.getText().trim();
@@ -132,98 +136,84 @@ public class RegistrarJugador extends JDialog {
         }
     }
 
+    /**
+     * Método para registrar el jugador. 
+     * Incluye la conversión de la altura a float usando floatValue().
+     */
     private void registrarJugador() {
-        // 1) Validar si hay equipos
-        if (cbEquipo.getItemCount() == 0) {
+        // 1. Validación básica
+        if (txtNombre.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Ingrese el nombre", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // 2. Crear jugador en bloque try-catch separado
+        Jugador jugador = null;
+        try {
+            LocalDate fechaNac = LocalDate.parse(
+                txtFechaNac.getText(),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            );
+
+            // Conversión correcta de JSpinner a float
+            float altura = ((Number) spinnerAltura.getValue()).floatValue();
+
+            if (cbTipo.getSelectedItem().equals("Bateador")) {
+                jugador = new Bateador(
+                    txtNombre.getText(),
+                    fechaNac,
+                    lblEdad.getText(),
+                    txtNacionalidad.getText(),
+                    cbMano.getSelectedItem().toString(),
+                    LocalDate.now(),
+                    altura,
+                    cbPosicion.getSelectedItem().toString()
+                );
+            } else {
+                // Mismos parámetros para el Pitcher (verifica tu constructor).
+                jugador = new Pitcher(
+                    txtNombre.getText(),
+                    fechaNac,
+                    lblEdad.getText(),
+                    txtNacionalidad.getText(),
+                    cbMano.getSelectedItem().toString(),
+                    LocalDate.now(),
+                    altura,
+                    cbPosicion.getSelectedItem().toString()
+                );
+            }
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(
                 this,
-                "No hay equipos registrados. Registre un equipo primero.",
+                "Error en los datos: " + e.getMessage(),
                 "Error",
                 JOptionPane.ERROR_MESSAGE
             );
             return;
         }
 
-        // 2) Obtener datos
-        String nombre = txtNombre.getText().trim();
-        String nacionalidad = txtNacionalidad.getText().trim();
-        String manoDominante = (String) cbMano.getSelectedItem();
-        float altura = (float) spinnerAltura.getValue();
-        String posicion = (String) cbPosicion.getSelectedItem();
-        String tipoSeleccionado = (String) cbTipo.getSelectedItem();
-
-        // 3) Validaciones
-        if (nombre.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El campo 'Nombre' está vacío.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (nacionalidad.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El campo 'Nacionalidad' está vacío.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        if (posicion == null || posicion.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Debe seleccionar una posición.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        // 4) Parsear fecha de nacimiento
-        LocalDate fechaNac;
+        // 3. Registrar en SerieNacional (con verificación extrema)
         try {
-            String fechaTexto = txtFechaNac.getText().trim();
-            fechaNac = LocalDate.parse(fechaTexto, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            if (serie == null) {
+                JOptionPane.showMessageDialog(this, "Error: Serie Nacional no disponible", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (serie.getListEquipos().isEmpty()) {
+                serie.agregarEquipo(new Equipo("Equipo Automático"));
+            }
+
+            // Asignación directa (sin validaciones intermedias)
+            serie.getListEquipos().get(0).getJugadores().add(jugador);
+
+            // 4. Cierra el diálogo
+            SwingUtilities.invokeLater(() -> {
+                dispose();
+            });
+            
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Fecha de nacimiento inválida. Use dd/MM/yyyy.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+            JOptionPane.showMessageDialog(this, "Error al guardar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-        // 5) Crear jugador
-        String edad = lblEdad.getText(); // Se maneja como String en la clase Jugador
-        Jugador nuevoJugador;
-        if ("Bateador".equals(tipoSeleccionado)) {
-            nuevoJugador = new Bateador(
-                nombre,
-                fechaNac,
-                edad,
-                nacionalidad,
-                manoDominante,
-                LocalDate.now(),
-                altura,
-                posicion
-            );
-        } else {
-            nuevoJugador = new Pitcher(
-                nombre,
-                fechaNac,
-                edad,
-                nacionalidad,
-                manoDominante,
-                LocalDate.now(),
-                altura,
-                posicion
-            );
-        }
-
-        // 6) Agregar a la lista de jugadores de la serie
-        serie.agregarJugador(nuevoJugador);
-
-        // 7) Asociar al equipo seleccionado
-        Equipo equipoSeleccionado = (Equipo) cbEquipo.getSelectedItem();
-        if (equipoSeleccionado == null) {
-            JOptionPane.showMessageDialog(this, "No se ha seleccionado un equipo.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        equipoSeleccionado.agregarJugador(nuevoJugador); // Uso del método que retorna boolean
-
-        // 8) Mensaje de éxito
-        JOptionPane.showMessageDialog(
-            this,
-            "¡El jugador ha sido registrado exitosamente!",
-            "Registro Exitoso",
-            JOptionPane.INFORMATION_MESSAGE
-        );
-
-        // Cierra el diálogo
-        dispose();
     }
 }
 
