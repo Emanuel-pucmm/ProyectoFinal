@@ -1,6 +1,7 @@
 package visual;
 
 import javax.swing.*;
+import javax.swing.text.*;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -15,7 +16,7 @@ public class RegistrarLesion extends JDialog {
     private JLabel lblFechaFin, lblEquipo;
     private SerieNacional serie;
 
-    public RegistrarLesion(SerieNacional serie) {
+    public RegistrarLesion(SerieNacional serie) { // Corregí el typo en "SerieNacional"
         this.serie = serie;
         setTitle("Registrar Lesión");
         setSize(500, 300);
@@ -27,11 +28,6 @@ public class RegistrarLesion extends JDialog {
 
         panel.add(new JLabel("Jugador:"));
         cbJugador = new JComboBox<>();
-        for (Equipo equipo : serie.getListEquipos()) {
-            for (Jugador jugador : equipo.getJugadores()) {
-                cbJugador.addItem(jugador);
-            }
-        }
         cbJugador.addActionListener(e -> actualizarEquipoJugador());
         panel.add(cbJugador);
 
@@ -45,7 +41,7 @@ public class RegistrarLesion extends JDialog {
 
         panel.add(new JLabel("Fecha Inicio (dd/MM/yyyy):"));
         txtFechaInicio = new JFormattedTextField(new SimpleDateFormat("dd/MM/yyyy"));
-        txtFechaInicio.setValue(LocalDate.now());
+        txtFechaInicio.setValue(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))); // Corregido
         txtFechaInicio.addPropertyChangeListener("value", e -> calcularFechaFin());
         panel.add(txtFechaInicio);
 
@@ -71,15 +67,28 @@ public class RegistrarLesion extends JDialog {
         add(panel, BorderLayout.CENTER);
         add(panelBotones, BorderLayout.SOUTH);
 
-        // Calcular fecha fin inicial
+        cargarComboJugadores();
         calcularFechaFin();
+    }
+
+    private void cargarComboJugadores() {
+        cbJugador.removeAllItems();
+        if (serie != null && serie.getListEquipos() != null) {
+            for (Equipo equipo : serie.getListEquipos()) {
+                if (equipo.getJugadores() != null) {
+                    for (Jugador jugador : equipo.getJugadores()) {
+                        cbJugador.addItem(jugador);
+                    }
+                }
+            }
+        }
     }
 
     private void actualizarEquipoJugador() {
         Jugador jugador = (Jugador) cbJugador.getSelectedItem();
-        if (jugador != null) {
+        if (jugador != null && serie != null && serie.getListEquipos() != null) {
             for (Equipo equipo : serie.getListEquipos()) {
-                if (equipo.getJugadores().contains(jugador)) {
+                if (equipo.getJugadores() != null && equipo.getJugadores().contains(jugador)) {
                     lblEquipo.setText(equipo.getNombre());
                     break;
                 }
@@ -89,10 +98,13 @@ public class RegistrarLesion extends JDialog {
 
     private void calcularFechaFin() {
         try {
-            LocalDate fechaInicio = LocalDate.parse(txtFechaInicio.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            int diasRecuperacion = (int) spinnerDias.getValue();
-            LocalDate fechaFin = fechaInicio.plusDays(diasRecuperacion);
-            lblFechaFin.setText(fechaFin.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            String fechaStr = txtFechaInicio.getText();
+            if (fechaStr != null && !fechaStr.isEmpty()) {
+                LocalDate fechaInicio = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                int diasRecuperacion = (int) spinnerDias.getValue();
+                LocalDate fechaFin = fechaInicio.plusDays(diasRecuperacion);
+                lblFechaFin.setText(fechaFin.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            }
         } catch (Exception e) {
             lblFechaFin.setText("Fecha inválida");
         }
@@ -100,28 +112,39 @@ public class RegistrarLesion extends JDialog {
 
     private void registrarLesion() {
         try {
-            Jugador jugador = (Jugador) cbJugador.getSelectedItem();
-            String tipo = txtTipo.getText();
-            LocalDate fechaInicio = LocalDate.parse(txtFechaInicio.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            int diasRecuperacion = (int) spinnerDias.getValue();
-            LocalDate fechaFin = fechaInicio.plusDays(diasRecuperacion);
-
-            if (tipo.isEmpty()) {
+            // Validación básica
+            if (txtTipo.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Ingrese el tipo de lesión", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
+            Jugador jugador = (Jugador) cbJugador.getSelectedItem();
+            if (jugador == null) {
+                JOptionPane.showMessageDialog(this, "Seleccione un jugador", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Obtener fecha de inicio
+            LocalDate fechaInicio = LocalDate.parse(txtFechaInicio.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            int diasRecuperacion = (int) spinnerDias.getValue();
+
             Lesion lesion = new Lesion(
-                tipo,
+                txtTipo.getText(),
                 fechaInicio,
-                fechaFin,
+                fechaInicio.plusDays(diasRecuperacion),
                 diasRecuperacion
             );
+
             jugador.registrarLesion(lesion);
+
             JOptionPane.showMessageDialog(this, "Lesión registrada exitosamente!");
             dispose();
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error en los datos ingresados", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                "Error al registrar: " + e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 }

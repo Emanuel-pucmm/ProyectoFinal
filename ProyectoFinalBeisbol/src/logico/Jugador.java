@@ -89,14 +89,14 @@ public abstract class Jugador {
         return listaLesiones;
     }
 
-    // Método para registrar una lesión
+    // Método para registrar una lesión (actualizado)
     public void registrarLesion(Lesion lesion) {
-        if (lesion != null) {
-            this.listaLesiones.add(lesion);
+        if (listaLesiones == null) {
+            listaLesiones = new ArrayList<>();
         }
+        listaLesiones.add(lesion);
     }
 
     // Método abstracto (para saber si es Bateador o Pitcher)
     public abstract String getTipoJugador();
 }
-
