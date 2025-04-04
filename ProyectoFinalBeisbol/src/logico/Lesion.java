@@ -3,7 +3,8 @@ package logico;
 import java.time.LocalDate;
 
 public class Lesion {
-    // Atributos seg˙n el UML
+
+    // Atributos seg√∫n el UML
     private String tipo;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
@@ -50,19 +51,26 @@ public class Lesion {
         this.diasRecuperacion = diasRecuperacion;
     }
 
-    // MÈtodo para calcular dÌas fuera (versiÛn simplificada)
+    // M√©todo para calcular d√≠as fuera (versi√≥n simplificada)
     public int calcDiasFuera() {
         if (fechaInicio != null && fechaFin != null) {
-            // Diferencia en dÌas usando toEpochDay()
-            return (int)(fechaFin.toEpochDay() - fechaInicio.toEpochDay());
+            // Diferencia en d√≠as usando toEpochDay()
+            return (int) (fechaFin.toEpochDay() - fechaInicio.toEpochDay());
         }
         return diasRecuperacion;
     }
 
-    // MÈtodo para verificar si la lesiÛn est· activa
+    // M√©todo para verificar si la lesi√≥n est√° activa
     public boolean estaActiva() {
         LocalDate hoy = LocalDate.now();
         return !hoy.isBefore(fechaInicio) && !hoy.isAfter(fechaFin);
     }
 
+    // =====================================================
+    // Nuevo m√©todo para a√±adir la lesi√≥n a la lista en SerieNacional
+    // =====================================================
+    public static void registrarLesion(SerieNacional serie, Lesion lesion) {
+        // Agrega la lesi√≥n al atributo listLesiones de la clase SerieNacional
+        serie.getListLesiones().add(lesion); // ‚Üê A√±adir esta l√≠nea
+    }
 }

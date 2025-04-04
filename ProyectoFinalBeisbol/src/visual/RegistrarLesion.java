@@ -1,27 +1,30 @@
 package visual;
 
 import javax.swing.*;
-import javax.swing.text.*;
 import java.awt.*;
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.time.format.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.Period;
 import logico.*;
 
 public class RegistrarLesion extends JDialog {
     private JComboBox<Jugador> cbJugador;
     private JTextField txtTipo;
     private JSpinner spinnerDias;
-    private JFormattedTextField txtFechaInicio;
+    private JTextField txtFechaInicio; // ‚Üê Usamos JTextField simple
     private JLabel lblFechaFin, lblEquipo;
     private SerieNacional serie;
 
     public RegistrarLesion(SerieNacional serie) {
         this.serie = serie;
-        setTitle("Registrar LesiÛn");
+        setTitle("Registrar Lesi√≥n [Texto en fecha]");
         setSize(500, 300);
         setLocationRelativeTo(null);
         setModal(true);
+
+        // Debug
+        System.out.println("=== [DEBUG] Constructor RegistrarLesion ===");
+        System.out.println("Cantidad de equipos en la serie: " + serie.getListEquipos().size());
 
         JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -37,20 +40,26 @@ public class RegistrarLesion extends JDialog {
         lblEquipo = new JLabel("Seleccione un jugador");
         panel.add(lblEquipo);
 
-        // 3) Tipo de LesiÛn
-        panel.add(new JLabel("Tipo de LesiÛn:"));
+        // 3) Tipo de Lesi√≥n
+        panel.add(new JLabel("Tipo de Lesi√≥n:"));
         txtTipo = new JTextField();
         panel.add(txtTipo);
 
-        // 4) Fecha Inicio
+        // 4) Fecha Inicio (dd/MM/yyyy) como JTextField
         panel.add(new JLabel("Fecha Inicio (dd/MM/yyyy):"));
-        txtFechaInicio = new JFormattedTextField(new SimpleDateFormat("dd/MM/yyyy"));
-        txtFechaInicio.setValue(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        txtFechaInicio.addPropertyChangeListener("value", e -> calcularFechaFin());
+        txtFechaInicio = new JTextField();
+        // inicializamos con la fecha de hoy
+        txtFechaInicio.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        // cada vez que pierda el foco, recalculamos fecha fin
+        txtFechaInicio.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                calcularFechaFin();
+            }
+        });
         panel.add(txtFechaInicio);
 
-        // 5) DÌas de RecuperaciÛn
-        panel.add(new JLabel("DÌas de RecuperaciÛn:"));
+        // 5) D√≠as de Recuperaci√≥n
+        panel.add(new JLabel("D√≠as de Recuperaci√≥n:"));
         spinnerDias = new JSpinner(new SpinnerNumberModel(15, 1, 365, 1));
         spinnerDias.addChangeListener(e -> calcularFechaFin());
         panel.add(spinnerDias);
@@ -63,7 +72,6 @@ public class RegistrarLesion extends JDialog {
         // Botones
         JButton btnRegistrar = new JButton("Registrar");
         btnRegistrar.addActionListener(e -> registrarLesion());
-
         JButton btnCancelar = new JButton("Cancelar");
         btnCancelar.addActionListener(e -> dispose());
 
@@ -74,33 +82,30 @@ public class RegistrarLesion extends JDialog {
         add(panel, BorderLayout.CENTER);
         add(panelBotones, BorderLayout.SOUTH);
 
-        // Cargar jugadores en el ComboBox
+        // Cargar jugadores en el combo
         cargarComboJugadores();
-        // Calcular la fecha final por defecto
+        // Calcular la fecha fin por defecto
         calcularFechaFin();
     }
 
-    /**
-     * Carga todos los jugadores de todos los equipos en el ComboBox,
-     * validando que no sean nulos.
-     */
     private void cargarComboJugadores() {
+        System.out.println("=== [DEBUG] RegistrarLesion -> cargarComboJugadores() ===");
         cbJugador.removeAllItems();
         try {
-            // Asegurar que la serie y sus equipos no sean nulos
             if (serie != null && serie.getListEquipos() != null) {
                 for (Equipo equipo : serie.getListEquipos()) {
                     if (equipo.getJugadores() != null) {
                         for (Jugador jugador : equipo.getJugadores()) {
-                            // Verificar que el jugador no sea nulo
                             if (jugador != null) {
                                 cbJugador.addItem(jugador);
+                                System.out.println("   - Jugador agregado al combo: " + jugador.getNombre());
                             }
                         }
                     }
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(
                 this,
                 "Error al cargar jugadores: " + e.getMessage(),
@@ -110,94 +115,84 @@ public class RegistrarLesion extends JDialog {
         }
     }
 
-    /**
-     * Actualiza la etiqueta que muestra el equipo del jugador seleccionado.
-     */
     private void actualizarEquipoJugador() {
         Jugador jugador = (Jugador) cbJugador.getSelectedItem();
-        if (jugador != null && serie != null && serie.getListEquipos() != null) {
+        if (jugador != null) {
             for (Equipo equipo : serie.getListEquipos()) {
-                if (equipo.getJugadores() != null && equipo.getJugadores().contains(jugador)) {
+                if (equipo.getJugadores().contains(jugador)) {
                     lblEquipo.setText(equipo.getNombre());
                     break;
                 }
             }
+        } else {
+            lblEquipo.setText("Seleccione un jugador");
         }
     }
 
-    /**
-     * Calcula la fecha estimada de fin de la lesiÛn, en base a la
-     * fecha de inicio y los dÌas de recuperaciÛn, y la muestra en pantalla.
-     */
     private void calcularFechaFin() {
         try {
-            String fechaStr = txtFechaInicio.getText();
-            if (fechaStr != null && !fechaStr.isEmpty()) {
+            String fechaStr = txtFechaInicio.getText().trim();
+            if (!fechaStr.isEmpty()) {
                 LocalDate fechaInicio = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                 int diasRecuperacion = (int) spinnerDias.getValue();
                 LocalDate fechaFin = fechaInicio.plusDays(diasRecuperacion);
                 lblFechaFin.setText(fechaFin.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             }
         } catch (Exception e) {
-            lblFechaFin.setText("Fecha inv·lida");
+            lblFechaFin.setText("Fecha inv√°lida");
         }
     }
 
-    /**
-     * Registra la lesiÛn en la lista de lesiones del jugador seleccionado.
-     */
     private void registrarLesion() {
         try {
-            // ValidaciÛn b·sica
             if (txtTipo.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(
                     this,
-                    "Ingrese el tipo de lesiÛn",
+                    "Ingrese el tipo de lesi√≥n",
                     "Error",
                     JOptionPane.ERROR_MESSAGE
                 );
                 return;
             }
 
-            // Validar que se haya seleccionado un jugador
             Jugador jugador = (Jugador) cbJugador.getSelectedItem();
             if (jugador == null) {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Seleccione un jugador",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-                );
+                JOptionPane.showMessageDialog(this, "Seleccione un jugador", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Obtener fecha de inicio
-            LocalDate fechaInicio = LocalDate.parse(
-                txtFechaInicio.getText(),
-                DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            );
+            String fechaStr = txtFechaInicio.getText().trim();
+            if (fechaStr.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Ingrese una fecha de inicio", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-            // Obtener dÌas de recuperaciÛn
+            LocalDate fechaInicio = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             int diasRecuperacion = (int) spinnerDias.getValue();
+            LocalDate fechaFin = fechaInicio.plusDays(diasRecuperacion);
 
-            // Crear el objeto Lesion
             Lesion lesion = new Lesion(
-                txtTipo.getText(),
+                txtTipo.getText().trim(),
                 fechaInicio,
-                fechaInicio.plusDays(diasRecuperacion),
+                fechaFin,
                 diasRecuperacion
             );
 
-            // Registrar la lesiÛn en el jugador
             jugador.registrarLesion(lesion);
 
-            JOptionPane.showMessageDialog(
-                this,
-                "LesiÛn registrada exitosamente!"
-            );
-            dispose();
+            JOptionPane.showMessageDialog(this, "Lesi√≥n registrada exitosamente!");
 
+            // DEBUG
+            System.out.println("=== [DEBUG] RegistrarLesion -> registrarLesion() ===");
+            System.out.println("Lesi√≥n registrada al jugador: " + jugador.getNombre()
+                + ", Equipo: " + lblEquipo.getText()
+                + ", Tipo: " + txtTipo.getText()
+                + ", Fecha Inicio: " + fechaInicio
+                + ", Fecha Fin: " + fechaFin);
+
+            dispose();
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(
                 this,
                 "Error al registrar: " + e.getMessage(),
@@ -207,3 +202,4 @@ public class RegistrarLesion extends JDialog {
         }
     }
 }
+
