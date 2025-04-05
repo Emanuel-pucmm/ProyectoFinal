@@ -8,9 +8,9 @@ public class Pitcher extends Jugador {
     private ArrayList<String> tiposLanzamientos;
     private PitcherEstadisticas statsPitcher;
 
-    public Pitcher(String nombre, LocalDate fechaNacimiento, String edad, 
-     String nacionalidad, String manoDominante, LocalDate fechaDebut, 
-    float altura, String tipoLanzador) {
+    public Pitcher(String nombre, LocalDate fechaNacimiento, String edad,
+                   String nacionalidad, String manoDominante, LocalDate fechaDebut,
+                   float altura, String tipoLanzador) {
         super(nombre, fechaNacimiento, edad, nacionalidad, manoDominante, fechaDebut, altura);
         this.tipoLanzador = tipoLanzador;
         this.tiposLanzamientos = new ArrayList<>();
@@ -33,29 +33,16 @@ public class Pitcher extends Jugador {
         return statsPitcher;
     }
 
-    public String obtenerTipoPitcher() {
-        return this.tipoLanzador;
-    }
-
-    public PitcherEstadisticas obtenerEstadisticas() {
-        return this.statsPitcher;
-    }
-
-    public void actualizarEstadisticas(PitcherEstadisticas nuevasStats) {
-        this.statsPitcher = nuevasStats;
-    }
-
-    public void agregarLanzamiento(String tipoLanzamiento) {
-        if (tipoLanzamiento != null && !tipoLanzamiento.isEmpty()) {
-            this.tiposLanzamientos.add(tipoLanzamiento);
-        }
-    }
-
-    public ArrayList<String> obtenerLanzamientos() {
-        return new ArrayList<>(this.tiposLanzamientos);
-    }
-    
+    @Override
     public String getTipoJugador() {
         return "Lanzador";
+    }
+
+    // Sobrescribimos toString() (opcional)
+    @Override
+    public String toString() {
+        // Por defecto, mostramos el nombre heredado de Jugador
+        // Podrías hacer: return super.toString() + " (Pitcher)";
+        return super.toString();
     }
 }

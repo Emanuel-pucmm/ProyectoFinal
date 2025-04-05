@@ -1,37 +1,35 @@
 package logico;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class SerieNacional {
-    
+
     private ArrayList<Partido> listPartidos;
     private ArrayList<Equipo> listEquipos;
     private ArrayList<Jugador> listJugadores;
+    private ArrayList<Lesion> listLesiones;  // ‚Üê Nuevo atributo
 
     /**
      * Constructor que recibe las listas ya creadas.
-     * Si necesitas que arranquen siempre vacÌas,
-     * puedes pasar new ArrayList<>() en cada par·metro
-     * cuando crees la SerieNacional.
      */
     public SerieNacional(ArrayList<Partido> listPartidos,
                          ArrayList<Equipo> listEquipos,
-                         ArrayList<Jugador> listJugadores) {
-        // Asigna las listas
+                         ArrayList<Jugador> listJugadores,
+                         ArrayList<Lesion> listLesiones) {
         this.listPartidos = listPartidos;
         this.listEquipos = listEquipos;
         this.listJugadores = listJugadores;
+        this.listLesiones = listLesiones;
     }
 
     /**
-     * Constructor por defecto, inicializa todas las listas
-     * como ArrayList vacÌos.
+     * Constructor por defecto (inicializa todas las listas vac√≠as).
      */
     public SerieNacional() {
         this.listPartidos = new ArrayList<>();
         this.listEquipos = new ArrayList<>();
         this.listJugadores = new ArrayList<>();
+        this.listLesiones = new ArrayList<>();
     }
 
     // ================== GETTERS / SETTERS ================== //
@@ -60,10 +58,19 @@ public class SerieNacional {
         this.listJugadores = listJugadores;
     }
 
-    // ================== M…TODOS AUXILIARES ================== //
+    // Getter y Setter para la lista de Lesiones
+    public ArrayList<Lesion> getListLesiones() {
+        return listLesiones;
+    }
+
+    public void setListLesiones(ArrayList<Lesion> listLesiones) {
+        this.listLesiones = listLesiones;
+    }
+
+    // ================== M√âTODOS AUXILIARES ================== //
 
     /**
-     * Agrega un equipo a la lista de equipos, si no est· ya incluido.
+     * Agrega un equipo a la lista de equipos, si no est√° ya incluido.
      */
     public void agregarEquipo(Equipo equipo) {
         if (equipo != null && !listEquipos.contains(equipo)) {
@@ -73,8 +80,8 @@ public class SerieNacional {
 
     /**
      * Agrega un jugador a la lista general de jugadores,
-     * si no est· ya incluido.
-     * Nota: Esto NO lo asigna a ning˙n equipo autom·ticamente.
+     * si no est√° ya incluido.
+     * Nota: Esto NO lo asigna a ning√∫n equipo autom√°ticamente.
      */
     public void agregarJugador(Jugador jugador) {
         if (jugador != null && !listJugadores.contains(jugador)) {
@@ -84,7 +91,7 @@ public class SerieNacional {
 
     /**
      * Agrega un partido a la lista de partidos,
-     * si no est· ya incluido.
+     * si no est√° ya incluido.
      */
     public void agregarPartido(Partido partido) {
         if (partido != null && !listPartidos.contains(partido)) {
@@ -118,4 +125,3 @@ public class SerieNacional {
         return null;
     }
 }
-

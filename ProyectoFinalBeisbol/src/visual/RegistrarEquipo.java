@@ -3,8 +3,8 @@ package visual;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-
-import logico.*;
+import logico.SerieNacional;
+import logico.Equipo;
 
 public class RegistrarEquipo extends JDialog {
     private JTextField txtNombre, txtEstadio;
@@ -30,20 +30,29 @@ public class RegistrarEquipo extends JDialog {
 
         JButton btnRegistrar = new JButton("Registrar");
         btnRegistrar.addActionListener(e -> {
-            if (txtNombre.getText().isEmpty() || txtEstadio.getText().isEmpty()) {
+            if (txtNombre.getText().trim().isEmpty() || txtEstadio.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Complete todos los campos", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             Equipo equipo = new Equipo(
-                txtNombre.getText(),
-                txtEstadio.getText(),
-                false, 0, 0,
+                txtNombre.getText().trim(),
+                txtEstadio.getText().trim(),
+                false,
+                0, 0,
                 new ArrayList<>(),
                 new ArrayList<>()
             );
+
             serie.agregarEquipo(equipo);
+
             JOptionPane.showMessageDialog(this, "Equipo registrado exitosamente!");
+
+            // DEBUG
+            System.out.println("=== [DEBUG] RegistrarEquipo ===");
+            System.out.println("Se agregó el equipo: " + equipo.getNombre()
+                + " (Total equipos ahora en serie: " + serie.getListEquipos().size() + ")");
+
             dispose();
         });
 
@@ -58,3 +67,4 @@ public class RegistrarEquipo extends JDialog {
         add(panelBotones, BorderLayout.SOUTH);
     }
 }
+

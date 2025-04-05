@@ -6,8 +6,8 @@ public class Bateador extends Jugador {
     private String posicion;
     private BateadorEstadisticas statsBateador;
 
-    public Bateador(String nombre, LocalDate fechaNacimiento, String edad, 
-                   String nacionalidad, String manoDominante, LocalDate fechaDebut, 
+    public Bateador(String nombre, LocalDate fechaNacimiento, String edad,
+                   String nacionalidad, String manoDominante, LocalDate fechaDebut,
                    float altura, String posicion) {
         super(nombre, fechaNacimiento, edad, nacionalidad, manoDominante, fechaDebut, altura);
         this.posicion = posicion;
@@ -17,7 +17,6 @@ public class Bateador extends Jugador {
     public String getPosicion() {
         return posicion;
     }
-
     public void setPosicion(String posicion) {
         this.posicion = posicion;
     }
@@ -26,20 +25,17 @@ public class Bateador extends Jugador {
         return statsBateador;
     }
 
-    public String obtenerPosicion() {
-        return this.posicion;
-    }
-
-    public BateadorEstadisticas obtenerEstadisticas() {
-        return this.statsBateador;
-    }
-
-    public void actualizarEstadisticas(BateadorEstadisticas nuevasStats) {
-        this.statsBateador = nuevasStats;
-    }
-    
     @Override
     public String getTipoJugador() {
         return "Bateador";
+    }
+
+    // (Opcional) sobrescribimos toString() para mostrar algo más si queremos
+    @Override
+    public String toString() {
+        // Llama al método de Jugador, que muestra el nombre
+        // Podrías añadirle más info, por ejemplo:
+        // return super.toString() + " (Bateador)";
+        return super.toString();
     }
 }

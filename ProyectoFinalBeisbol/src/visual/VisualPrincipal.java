@@ -3,31 +3,31 @@ package visual;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.time.*;
-import java.util.*;
 import java.util.List;
-import logico.*;
+import logico.SerieNacional;
+import logico.Equipo;
 
 public class VisualPrincipal extends JFrame {
     private SerieNacional serie;
 
     public VisualPrincipal() {
-        serie = new SerieNacional(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        // ÚNICA instancia de la Serie (no crees otra en tu main)
+        serie = new SerieNacional();
         initComponents();
     }
 
     private void initComponents() {
-        setTitle("Sistema de Gestión de Béisbol");
+        setTitle("Sistema de Gestión de Béisbol - [Debug Version]");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
-        // Configurar menú
+        // Menú
         configurarMenuBar();
 
-        // Configurar banner con imagen
+        // Banner (opcional, puedes omitir si no tienes la imagen)
         configurarBanner();
 
-        // Configurar Look and Feel
+        // Look & Feel
         setSystemLookAndFeel();
     }
 
@@ -42,7 +42,8 @@ public class VisualPrincipal extends JFrame {
 
         // Menú Lesiones
         JMenu mnLesiones = new JMenu("Lesiones");
-        addMenuItem(mnLesiones, "Registrar Lesión", e -> verificarAntesDeRegistrarLesion());
+        // Fuerza abrir la ventana “Registrar Lesión” sin importar si hay o no equipos
+        addMenuItem(mnLesiones, "Registrar Lesión", e -> abrirForzadoRegistrarLesion());
         addMenuItem(mnLesiones, "Listar Lesiones", e -> verificarAntesDeListarLesiones());
         menuBar.add(mnLesiones);
 
@@ -62,34 +63,54 @@ public class VisualPrincipal extends JFrame {
         setJMenuBar(menuBar);
     }
 
+    /**
+     * Versión que abre la ventana "RegistrarLesion" sin chequear si la serie está vacía,
+     * para descartar que el problema sea el if (serie.getListEquipos().isEmpty()).
+     */
+    private void abrirForzadoRegistrarLesion() {
+        System.out.println("=== [DEBUG] abrirForzadoRegistrarLesion() ===");
+        System.out.println("Cantidad de equipos en la serie: " + serie.getListEquipos().size());
+        for (Equipo eq : serie.getListEquipos()) {
+            System.out.println("  -> " + eq.getNombre() + ", Jugadores: " + eq.getJugadores().size());
+        }
+
+        try {
+            new RegistrarLesion(serie).setVisible(true);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showError("Ocurrió una excepción al abrir la ventana de lesiones: " + ex.getMessage());
+        }
+    }
+
+    private void verificarAntesDeListarLesiones() {
+        // Aquí sí chequeamos si la serie está vacía para listar
+        if (serie.getListEquipos().isEmpty()) {
+            showError("No hay equipos registrados.");
+            return;
+        }
+        new ListadoLesiones(serie).setVisible(true);
+    }
+
     private void configurarBanner() {
         try {
             ImageIcon originalIcon = new ImageIcon(getClass().getResource("/resources/bannerBaseball.jpg"));
-
-            // Calcular dimensiones proporcionales
             Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
             int ancho = screenSize.width;
-            int alto = (int) (ancho * 0.2); // Relación de aspecto aproximada
-
-            Image imagenEscalada = originalIcon.getImage()
-                .getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
-
+            int alto = (int) (ancho * 0.2);
+            Image imagenEscalada = originalIcon.getImage().getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
             JLabel lblBanner = new JLabel(new ImageIcon(imagenEscalada));
             lblBanner.setHorizontalAlignment(SwingConstants.CENTER);
             add(lblBanner, BorderLayout.NORTH);
-
         } catch (Exception e) {
             JLabel lblError = new JLabel("Banner no disponible - " + e.getMessage());
             lblError.setFont(new Font("Arial", Font.BOLD, 20));
             lblError.setForeground(Color.RED);
             lblError.setHorizontalAlignment(SwingConstants.CENTER);
             add(lblError, BorderLayout.NORTH);
-
             System.err.println("Error cargando banner: " + e.getMessage());
         }
     }
 
-    // Métodos auxiliares
     private void addMenuItem(JMenu menu, String texto, ActionListener listener) {
         JMenuItem item = new JMenuItem(texto);
         item.addActionListener(listener);
@@ -104,50 +125,12 @@ public class VisualPrincipal extends JFrame {
         }
     }
 
-    // Métodos de verificación (SIMPLIFICADOS)
-    private void verificarAntesDeRegistrarLesion() {
-        // Simplificar validación
-        if (serie.getListEquipos().isEmpty()) {
-            showError("Registre al menos un equipo primero");
-            return;
-        }
-        
-        // Abrir directamente - la ventana manejará sus propias validaciones
-        new RegistrarLesion(serie).setVisible(true);
-    }
-
-    private void verificarAntesDeListarLesiones() {
-        // Simplificar validación
-        if (serie.getListEquipos().isEmpty()) {
-            showError("No hay equipos registrados");
-            return;
-        }
-        
-        // Abrir directamente
-        new ListadoLesiones(serie).setVisible(true);
-    }
-
-    private void verificarAntesDeSimularManual() {
-        if (serie.getListEquipos().size() < 2) {
-            showError("Se necesitan al menos 2 equipos");
-            return;
-        }
-        new SimularPartido(serie).setVisible(true);
-    }
-
-    private void verificarAntesDeMostrarTabla() {
-        if (serie.getListEquipos().isEmpty()) {
-            showError("No hay equipos registrados");
-            return;
-        }
-        new TablaPosiciones(serie).setVisible(true);
-    }
-
     private void showError(String mensaje) {
         JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    // Simulación de temporada
+    // ==================== SIMULACIÓN DE TEMPORADA ====================
+
     private void simularTemporadaCompleta() {
         if (serie.getListEquipos().size() < 2) {
             showError("Se necesitan al menos 2 equipos");
@@ -179,10 +162,26 @@ public class VisualPrincipal extends JFrame {
         for (int i = 0; i < 9; i++) {
             partido.simularInning();
         }
-
         partido.finalizarPartido();
     }
 
+    private void verificarAntesDeSimularManual() {
+        if (serie.getListEquipos().size() < 2) {
+            showError("Se necesitan al menos 2 equipos");
+            return;
+        }
+        new SimularPartido(serie).setVisible(true);
+    }
+
+    private void verificarAntesDeMostrarTabla() {
+        if (serie.getListEquipos().isEmpty()) {
+            showError("No hay equipos registrados");
+            return;
+        }
+        new TablaPosiciones(serie).setVisible(true);
+    }
+
+    // ==================== MAIN ====================
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             VisualPrincipal frame = new VisualPrincipal();

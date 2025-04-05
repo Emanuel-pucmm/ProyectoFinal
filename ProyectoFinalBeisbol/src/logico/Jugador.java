@@ -28,11 +28,10 @@ public abstract class Jugador {
         this.listaLesiones = new ArrayList<>();
     }
 
-    // Getters y Setters
+    // Getters / Setters
     public String getNombre() {
         return nombre;
     }
-
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
@@ -40,7 +39,6 @@ public abstract class Jugador {
     public LocalDate getFechaNacimiento() {
         return fechaNacimiento;
     }
-
     public void setFechaNacimiento(LocalDate fechaNacimiento) {
         this.fechaNacimiento = fechaNacimiento;
     }
@@ -48,7 +46,6 @@ public abstract class Jugador {
     public String getEdad() {
         return edad;
     }
-
     public void setEdad(String edad) {
         this.edad = edad;
     }
@@ -56,7 +53,6 @@ public abstract class Jugador {
     public String getNacionalidad() {
         return nacionalidad;
     }
-
     public void setNacionalidad(String nacionalidad) {
         this.nacionalidad = nacionalidad;
     }
@@ -64,7 +60,6 @@ public abstract class Jugador {
     public String getManoDominante() {
         return manoDominante;
     }
-
     public void setManoDominante(String manoDominante) {
         this.manoDominante = manoDominante;
     }
@@ -72,7 +67,6 @@ public abstract class Jugador {
     public LocalDate getFechaDebut() {
         return fechaDebut;
     }
-
     public void setFechaDebut(LocalDate fechaDebut) {
         this.fechaDebut = fechaDebut;
     }
@@ -80,7 +74,6 @@ public abstract class Jugador {
     public double getAltura() {
         return altura;
     }
-
     public void setAltura(double altura) {
         this.altura = altura;
     }
@@ -89,7 +82,7 @@ public abstract class Jugador {
         return listaLesiones;
     }
 
-    // Método para registrar una lesión (actualizado)
+    // Método para registrar una lesión
     public void registrarLesion(Lesion lesion) {
         if (listaLesiones == null) {
             listaLesiones = new ArrayList<>();
@@ -97,6 +90,16 @@ public abstract class Jugador {
         listaLesiones.add(lesion);
     }
 
-    // Método abstracto (para saber si es Bateador o Pitcher)
+    // Método abstracto
     public abstract String getTipoJugador();
+
+    // =========================
+    // SOBRESCRIBIMOS toString()
+    // =========================
+    @Override
+    public String toString() {
+        // Para que el ComboBox (o cualquier impresión) muestre el nombre real del jugador
+        return this.nombre;
+    }
 }
+
