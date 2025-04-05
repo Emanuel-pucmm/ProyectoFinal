@@ -190,6 +190,7 @@ public class RegistrarLesion extends JDialog {
 
             // Registrar la lesión en el jugador
             jugador.registrarLesion(lesion);
+           
 
             JOptionPane.showMessageDialog(
                 this,
