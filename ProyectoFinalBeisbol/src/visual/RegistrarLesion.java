@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.Period;
 import logico.*;
-
+import excepcion.*;
 public class RegistrarLesion extends JDialog {
     private JComboBox<Jugador> cbJugador;
     private JTextField txtTipo;
@@ -144,33 +144,35 @@ public class RegistrarLesion extends JDialog {
     }
 
     private void registrarLesion() {
-        try {
-            if (txtTipo.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Ingrese el tipo de lesión",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-                );
-                return;
+    	try {
+            // Validaciones
+            if(txtTipo.getText().trim().isEmpty()) {
+                throw new CampoVacioExcepcion("tipo de lesión");
             }
-
+            
             Jugador jugador = (Jugador) cbJugador.getSelectedItem();
-            if (jugador == null) {
-                JOptionPane.showMessageDialog(this, "Seleccione un jugador", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
+            if(jugador == null) {
+                throw new EquipoNoSeleccionadoExcepcion();
             }
-
-            String fechaStr = txtFechaInicio.getText().trim();
-            if (fechaStr.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Ingrese una fecha de inicio", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
+            
+            LocalDate fechaInicio;
+            try {
+                fechaInicio = LocalDate.parse(txtFechaInicio.getText().trim(), 
+                                           DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                if(fechaInicio.isAfter(LocalDate.now())) {
+                    throw new FechaInvalidaExcepcion("La fecha no puede ser futura");
+                }
+            } catch(Exception e) {
+                throw new FechaInvalidaExcepcion();
             }
-
-            LocalDate fechaInicio = LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            
             int diasRecuperacion = (int) spinnerDias.getValue();
-            LocalDate fechaFin = fechaInicio.plusDays(diasRecuperacion);
+            if(diasRecuperacion <= 0) {
+                throw new NumeroNegativoExcepcion("días de recuperación");
+            }
 
+            LocalDate fechaFin = fechaInicio.plusDays(diasRecuperacion);
+            
             Lesion lesion = new Lesion(
                 txtTipo.getText().trim(),
                 fechaInicio,
@@ -179,27 +181,15 @@ public class RegistrarLesion extends JDialog {
             );
 
             jugador.registrarLesion(lesion);
-           
-
             JOptionPane.showMessageDialog(this, "Lesión registrada exitosamente!");
-
-            // DEBUG
-            System.out.println("=== [DEBUG] RegistrarLesion -> registrarLesion() ===");
-            System.out.println("Lesión registrada al jugador: " + jugador.getNombre()
-                + ", Equipo: " + lblEquipo.getText()
-                + ", Tipo: " + txtTipo.getText()
-                + ", Fecha Inicio: " + fechaInicio
-                + ", Fecha Fin: " + fechaFin);
-
             dispose();
+
+        } catch (CampoVacioExcepcion | FechaInvalidaExcepcion | 
+                 NumeroNegativoExcepcion | EquipoNoSeleccionadoExcepcion ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(
-                this,
-                "Error al registrar: " + e.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), 
+                                        "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

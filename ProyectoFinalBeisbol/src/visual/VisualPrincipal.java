@@ -21,9 +21,12 @@ public class VisualPrincipal extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // Maximiza la ventana al inicio (opcional)
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setLayout(new BorderLayout());
 
         // Menú
         configurarMenuBar();
+        
+        setVisible(true);
 
         // Banner (cargamos "SerieNacional.jpg")
         configurarBanner();
@@ -68,40 +71,48 @@ public class VisualPrincipal extends JFrame {
      * Carga la imagen "SerieNacional.jpg" y la muestra como banner en la parte superior (NORTH).
      */
     private void configurarBanner() {
-        try {
-            // Ajusta la ruta dependiendo de dónde esté tu archivo:
-            //  - Si tu imagen está en src/main/resources (Maven) o en una carpeta "resources" configurada, 
-            //    asegúrate de que la ruta sea la misma en getResource:
-            //    getClass().getResource("/SerieNacional.jpg")
-            //  - Si la IDE copia la carpeta "resources" al classpath, quizá debas usar "/resources/SerieNacional.jpg".
-            
-            ImageIcon originalIcon = new ImageIcon(getClass().getResource("/SerieNacional.jpg"));
+    	   try {
+    	      ImageIcon originalIcon = new ImageIcon(getClass().getResource("/bannerBaseball.jpg"));
 
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            int ancho = screenSize.width;
-            int alto = (int) (ancho * 0.2); // 20% de la anchura
+    	      int ancho = getWidth();
+    	      int alto = getHeight();
 
-            // Escalamos la imagen
-            Image imagenEscalada = originalIcon.getImage().getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
+    	      Image imagenEscalada = originalIcon.getImage().getScaledInstance(
+    	         ancho,
+    	         alto,
+    	         Image.SCALE_SMOOTH
+    	      );
 
-            // Creamos un JLabel con la imagen ya escalada
-            JLabel lblBanner = new JLabel(new ImageIcon(imagenEscalada));
-            lblBanner.setHorizontalAlignment(SwingConstants.CENTER);
+    	      JLabel lblBanner = new JLabel(new ImageIcon(imagenEscalada));
+    	      lblBanner.setHorizontalAlignment(SwingConstants.CENTER);
 
-            // Lo añadimos arriba (NORTH) de la ventana
-            add(lblBanner, BorderLayout.NORTH);
+    	      getContentPane().removeAll(); // Borra todo lo anterior
+    	      getContentPane().add(lblBanner, BorderLayout.CENTER);
 
-        } catch (Exception e) {
-            // Si no se encuentra la imagen o hay error, mostramos un mensaje de error en su lugar
-            JLabel lblError = new JLabel("Banner no disponible - " + e.getMessage());
-            lblError.setFont(new Font("Arial", Font.BOLD, 20));
-            lblError.setForeground(Color.RED);
-            lblError.setHorizontalAlignment(SwingConstants.CENTER);
-            add(lblError, BorderLayout.NORTH);
+    	      revalidate();
+    	      repaint();
 
-            System.err.println("Error cargando banner: " + e.getMessage());
-        }
-    }
+    	      // Asegúrate de no añadir múltiples listeners
+    	      for (ComponentListener cl : getComponentListeners()) {
+    	         if (cl instanceof ComponentAdapter) return;
+    	      }
+
+    	      // Redibujar el banner si cambia el tamaño
+    	      addComponentListener(new ComponentAdapter() {
+    	         @Override
+    	         public void componentResized(ComponentEvent e) {
+    	            configurarBanner();
+    	         }
+    	      });
+
+    	   } catch (Exception e) {
+    	      JLabel error = new JLabel(" Error: bannerBaseball.jpg no encontrado");
+    	      error.setForeground(Color.RED);
+    	      getContentPane().removeAll();
+    	      getContentPane().add(error, BorderLayout.CENTER);
+    	      System.err.println("Error al cargar el banner: " + e.getMessage());
+    	   }
+    	}
 
     /**
      * Abre la ventana de RegistrarLesion sin chequear si la serie está vacía.

@@ -8,13 +8,14 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import logico.*;
+import excepcion.*;
 
 public class RegistrarJugador extends JDialog {
     private JTextField txtNombre, txtNacionalidad;
     private JComboBox<String> cbTipo, cbMano, cbPosicion;
     private JComboBox<Equipo> cbEquipo;
     private JSpinner spinnerAltura;
-    private JTextField txtFechaNac;  // ← Usamos un JTextField normal para la fecha
+    private JTextField txtFechaNac;
     private JLabel lblEdad;
     private SerieNacional serie;
 
@@ -44,9 +45,7 @@ public class RegistrarJugador extends JDialog {
         // FECHA NAC (como texto)
         panel.add(new JLabel("Fecha Nacimiento (dd/MM/yyyy):"));
         txtFechaNac = new JTextField();
-        // Inicializamos con la fecha de hoy
         txtFechaNac.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        // Al perder el foco, recalculamos edad
         txtFechaNac.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 calcularEdad();
@@ -123,48 +122,60 @@ public class RegistrarJugador extends JDialog {
             int edad = Period.between(fechaNac, LocalDate.now()).getYears();
             lblEdad.setText(String.valueOf(edad));
         } catch (Exception e) {
-            // Si la fecha no es válida, dejamos la edad en 0
             lblEdad.setText("0");
+        }
+    }
+    
+    private void validarNombre(String nombre) throws NombreInvalidoExcepcion, CampoVacioExcepcion {
+        if(nombre.isEmpty()) {
+            throw new CampoVacioExcepcion("nombre");
+        }
+        if(nombre.matches(".*\\d.*") || !nombre.matches("[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+")) {
+            throw new NombreInvalidoExcepcion();
         }
     }
 
     private void registrarJugador() {
-        if (txtNombre.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Ingrese el nombre", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        // Parseamos la fecha que escribió el usuario en txtFechaNac
-        LocalDate fechaNac;
         try {
-            fechaNac = LocalDate.parse(txtFechaNac.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Fecha de nacimiento inválida. Use dd/MM/yyyy", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            // Validaciones
+            validarNombre(txtNombre.getText().trim());
+            
+            if(txtNacionalidad.getText().trim().isEmpty()) {
+                throw new CampoVacioExcepcion("nacionalidad");
+            }
 
-        if (fechaNac.isAfter(LocalDate.now())) {
-            JOptionPane.showMessageDialog(this, "La fecha de nacimiento no puede ser futura.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            // Validar fecha
+            LocalDate fechaNac;
+            try {
+                fechaNac = LocalDate.parse(txtFechaNac.getText().trim(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                if(fechaNac.isAfter(LocalDate.now())) {
+                    throw new FechaInvalidaExcepcion("La fecha no puede ser futura");
+                }
+            } catch(Exception e) {
+                throw new FechaInvalidaExcepcion();
+            }
 
-        int edadCalculada = Period.between(fechaNac, LocalDate.now()).getYears();
-        if (edadCalculada <= 0) {
-            JOptionPane.showMessageDialog(this, "La edad debe ser mayor que 0.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        lblEdad.setText(String.valueOf(edadCalculada));
+            // Validar edad
+            int edad = Period.between(fechaNac, LocalDate.now()).getYears();
+            if(edad <= 0) {
+                throw new NumeroNegativoExcepcion("edad");
+            }
 
-        float altura = ((Number) spinnerAltura.getValue()).floatValue();
-        String tipoSeleccionado = (String) cbTipo.getSelectedItem();
+            // Validar altura
+            float altura = ((Number) spinnerAltura.getValue()).floatValue();
+            if(altura <= 0) {
+                throw new NumeroNegativoExcepcion("altura");
+            }
 
-        Jugador nuevoJugador = null;
-        try {
+            // Crear jugador
+            Jugador nuevoJugador = null;
+            String tipoSeleccionado = (String) cbTipo.getSelectedItem();
+            
             if ("Bateador".equals(tipoSeleccionado)) {
                 nuevoJugador = new Bateador(
                     txtNombre.getText().trim(),
                     fechaNac,
-                    lblEdad.getText(),
+                    String.valueOf(edad),
                     txtNacionalidad.getText().trim(),
                     cbMano.getSelectedItem().toString(),
                     LocalDate.now(),
@@ -175,7 +186,7 @@ public class RegistrarJugador extends JDialog {
                 nuevoJugador = new Pitcher(
                     txtNombre.getText().trim(),
                     fechaNac,
-                    lblEdad.getText(),
+                    String.valueOf(edad),
                     txtNacionalidad.getText().trim(),
                     cbMano.getSelectedItem().toString(),
                     LocalDate.now(),
@@ -183,31 +194,27 @@ public class RegistrarJugador extends JDialog {
                     cbPosicion.getSelectedItem().toString()
                 );
             }
+
+            // Validar equipo seleccionado
+            Equipo equipoSeleccionado = (Equipo) cbEquipo.getSelectedItem();
+            if (equipoSeleccionado == null) {
+                throw new EquipoNoSeleccionadoExcepcion();
+            }
+
+            // Registrar jugador
+            serie.getListJugadores().add(nuevoJugador);
+            equipoSeleccionado.getJugadores().add(nuevoJugador);
+
+            JOptionPane.showMessageDialog(this, "Jugador registrado exitosamente!");
+            dispose();
+
+        } catch (NombreInvalidoExcepcion | CampoVacioExcepcion | 
+                 FechaInvalidaExcepcion | NumeroNegativoExcepcion |
+                 EquipoNoSeleccionadoExcepcion e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error creando el jugador: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            return;
+            JOptionPane.showMessageDialog(this, "Error inesperado: " + e.getMessage(), 
+                                        "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-        Equipo equipoSeleccionado = (Equipo) cbEquipo.getSelectedItem();
-        if (equipoSeleccionado == null) {
-            JOptionPane.showMessageDialog(this, "Seleccione un equipo válido", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        serie.getListJugadores().add(nuevoJugador);
-        equipoSeleccionado.getJugadores().add(nuevoJugador);
-
-        JOptionPane.showMessageDialog(this, "Jugador registrado exitosamente!");
-
-        // DEBUG
-        System.out.println("=== [DEBUG] RegistrarJugador ===");
-        System.out.println("Se agregó el jugador: " + nuevoJugador.getNombre()
-            + " al equipo: " + equipoSeleccionado.getNombre()
-            + " (Jugadores en ese equipo ahora: " + equipoSeleccionado.getJugadores().size() + ")");
-        System.out.println("Jugadores totales en la serie: " + serie.getListJugadores().size());
-
-        dispose();
     }
 }
-
-

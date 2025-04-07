@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import logico.*;
+import excepcion.*;
 
 public class EditarEstadisticasBateador extends JDialog {
     private Bateador bateador;
@@ -76,24 +77,32 @@ public class EditarEstadisticasBateador extends JDialog {
     }
 
     private void guardarEstadisticas() {
-        // Validar que turnos >= hits
-        if ((int) spinnerTurnos.getValue() < (int) spinnerHits.getValue()) {
-            JOptionPane.showMessageDialog(
-                this, 
-                "Los turnos no pueden ser menores que los hits", 
-                "Error", 
-                JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
+    	 try {
+             int hits = (int) spinnerHits.getValue();
+             int turnos = (int) spinnerTurnos.getValue();
+             int hr = (int) spinnerHR.getValue();
+             int carreras = (int) spinnerCarreras.getValue();
+             
+             if(hits < 0 || turnos < 0 || hr < 0 || carreras < 0) {
+                 throw new NumeroNegativoExcepcion("estadísticas");
+             }
+             
+             if(turnos < hits) {
+                 throw new Exception("Los turnos no pueden ser menores que los hits");
+             }
 
-        // Actualizar stats
-        bateador.getStatsBateador().setHits((int) spinnerHits.getValue());
-        bateador.getStatsBateador().setTurnosAlBate((int) spinnerTurnos.getValue());
-        bateador.getStatsBateador().setHomeRuns((int) spinnerHR.getValue());
-        bateador.getStatsBateador().setCarrerasAnotadas((int) spinnerCarreras.getValue());
+             bateador.getStatsBateador().setHits(hits);
+             bateador.getStatsBateador().setTurnosAlBate(turnos);
+             bateador.getStatsBateador().setHomeRuns(hr);
+             bateador.getStatsBateador().setCarrerasAnotadas(carreras);
 
-        JOptionPane.showMessageDialog(this, "Estadísticas actualizadas!");
-        dispose();
-    }
+             JOptionPane.showMessageDialog(this, "Estadísticas actualizadas!");
+             dispose();
+
+         } catch (NumeroNegativoExcepcion e) {
+             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+         } catch (Exception e) {
+             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+         }
+     }
 }

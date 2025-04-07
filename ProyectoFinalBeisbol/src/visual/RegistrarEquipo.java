@@ -5,7 +5,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import logico.SerieNacional;
 import logico.Equipo;
-
+import excepcion.*;
 public class RegistrarEquipo extends JDialog {
     private JTextField txtNombre, txtEstadio;
     private SerieNacional serie;
@@ -30,10 +30,17 @@ public class RegistrarEquipo extends JDialog {
 
         JButton btnRegistrar = new JButton("Registrar");
         btnRegistrar.addActionListener(e -> {
-            if (txtNombre.getText().trim().isEmpty() || txtEstadio.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Complete todos los campos", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+        	try {
+                String nombre = txtNombre.getText().trim();
+                String estadio = txtEstadio.getText().trim();
+                
+                if(nombre.isEmpty()) throw new CampoVacioExcepcion("nombre del equipo");
+                if(estadio.isEmpty()) throw new CampoVacioExcepcion("estadio");
+                
+                // Validar nombre sin números
+                if(nombre.matches(".*\\d.*")) {
+                    throw new NombreInvalidoExcepcion();
+                }
 
             Equipo equipo = new Equipo(
                 txtNombre.getText().trim(),
@@ -45,15 +52,12 @@ public class RegistrarEquipo extends JDialog {
             );
 
             serie.agregarEquipo(equipo);
-
             JOptionPane.showMessageDialog(this, "Equipo registrado exitosamente!");
-
-            // DEBUG
-            System.out.println("=== [DEBUG] RegistrarEquipo ===");
-            System.out.println("Se agregó el equipo: " + equipo.getNombre()
-                + " (Total equipos ahora en serie: " + serie.getListEquipos().size() + ")");
-
             dispose();
+
+        	} catch (CampoVacioExcepcion | NombreInvalidoExcepcion ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         JButton btnCancelar = new JButton("Cancelar");
