@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class Pitcher extends Jugador {
+	
+	private static final long serialVersionUID = 1L;
     private String tipoLanzador;
     private ArrayList<String> tiposLanzamientos;
     private PitcherEstadisticas statsPitcher;

@@ -2,9 +2,11 @@ package logico;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.io.Serializable;
 
-public abstract class Jugador {
-    // Atributos
+public abstract class Jugador implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
     protected String nombre;
     protected LocalDate fechaNacimiento;
     protected String edad;  // manejado como String

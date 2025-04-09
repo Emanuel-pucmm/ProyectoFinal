@@ -3,6 +3,8 @@ package logico;
 import java.time.LocalDate;
 
 public class Bateador extends Jugador {
+	
+	private static final long serialVersionUID = 1L;
     private String posicion;
     private BateadorEstadisticas statsBateador;
 

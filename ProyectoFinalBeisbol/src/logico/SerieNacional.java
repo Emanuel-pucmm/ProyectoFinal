@@ -1,9 +1,11 @@
 package logico;
 
 import java.util.ArrayList;
+import java.io.Serializable;
 
-public class SerieNacional {
-
+public class SerieNacional implements Serializable{
+	
+	private static final long serialVersionUID = 1L;
     private ArrayList<Partido> listPartidos;
     private ArrayList<Equipo> listEquipos;
     private ArrayList<Jugador> listJugadores;
