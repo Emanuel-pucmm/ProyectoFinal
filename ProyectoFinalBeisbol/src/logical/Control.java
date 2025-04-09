@@ -47,8 +47,7 @@ public class Control implements Serializable {
     public SerieNacional getSerieNacional() { return serieNacional; }
     public void setSerieNacional(SerieNacional serieNacional) { this.serieNacional = serieNacional; }
 
-	public static void setControl(Control readObject) {
-		// TODO Auto-generated method stub
-		
-	}
+    public static void setControl(Control control) {
+        Control.control = control;
+    }
 }

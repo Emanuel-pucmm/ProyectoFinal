@@ -4,20 +4,24 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
+import java.util.ResourceBundle.Control;
+
 import logico.SerieNacional;
 import logico.Equipo;
 
 public class VisualPrincipal extends JFrame {
     private SerieNacional serie;
 
+
     public VisualPrincipal() {
         // Única instancia de la Serie
-        serie = new SerieNacional();
+        serie = SerieNacional.getInstance();
         initComponents();
+      
     }
 
     private void initComponents() {
-        setTitle("Sistema de Gestión de Béisbol - Con Imagen SerieNacional (JPG)");
+        setTitle("Sistema de Gestión de Béisbol");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // Maximiza la ventana al inicio (opcional)
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -65,6 +69,21 @@ public class VisualPrincipal extends JFrame {
         menuBar.add(mnPartidos);
 
         setJMenuBar(menuBar);
+        if (SerieNacional.getLoginUser() != null) {
+            String tipoUsuario = SerieNacional.getLoginUser().getTipo();
+            
+            // Si el usuario es Anotador, deshabilitamos todos los menús excepto Partidos
+            if (!tipoUsuario.equals("Anotador")) {
+                // El usuario es Administrador u otro tipo, todos los menús están visibles
+                // No hacemos nada, todos los menús ya están habilitados por defecto
+            } else {
+                // El usuario es Anotador, solo dejamos visible el menú de Partidos
+                mnJugadores.setVisible(false);
+                mnLesiones.setVisible(false);
+                mnEquipos.setVisible(false);
+                // El menú Partidos permanece visible
+            }
+        }
     }
 
     /**
@@ -213,12 +232,6 @@ public class VisualPrincipal extends JFrame {
         new TablaPosiciones(serie).setVisible(true);
     }
 
-    // ==================== MAIN ====================
-    public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            VisualPrincipal frame = new VisualPrincipal();
-            frame.setVisible(true);
-        });
-    }
+   
 }
 

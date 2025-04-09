@@ -1,6 +1,13 @@
 package logico;
 
 import java.util.ArrayList;
+
+import logical.Control;
+import logical.User;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public class SerieNacional implements Serializable{
@@ -10,6 +17,10 @@ public class SerieNacional implements Serializable{
     private ArrayList<Equipo> listEquipos;
     private ArrayList<Jugador> listJugadores;
     private ArrayList<Lesion> listLesiones;  // ← Nuevo atributo
+    private ArrayList<User> misUsers;
+    private static User loginUser;
+    private static SerieNacional control;
+    private static SerieNacional instance;
 
     /**
      * Constructor que recibe las listas ya creadas.
@@ -32,6 +43,7 @@ public class SerieNacional implements Serializable{
         this.listEquipos = new ArrayList<>();
         this.listJugadores = new ArrayList<>();
         this.listLesiones = new ArrayList<>();
+        misUsers = new ArrayList<>();
     }
 
     // ================== GETTERS / SETTERS ================== //
@@ -125,5 +137,68 @@ public class SerieNacional implements Serializable{
             }
         }
         return null;
+    }
+    public boolean confirmLogin(String username, String password) {
+        // If misUsers is empty or null, login will always fail
+        if (misUsers == null || misUsers.isEmpty()) {
+            System.out.println("No users found in the system");
+            return false;
+        }
+        
+        for (User user : misUsers) {
+            System.out.println("Checking user: " + user.getUserName());
+            if (user.getUserName().equals(username) && user.checkPassword(password)) {
+                loginUser = user;
+                System.out.println("Login successful for: " + username);
+                return true;
+            }
+        }
+        System.out.println("Login failed for: " + username);
+        return false;
+    }
+    public void regUser(User user) {
+    	if (misUsers == null) {
+            misUsers = new ArrayList<>();
+        }
+        misUsers.add(user);
+        guardarDatos();
+    }
+    private void guardarDatos() {
+        try {
+            FileOutputStream fileOut = new FileOutputStream("beisbol.dat");
+            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
+            objectOut.writeObject(this);  // Guardamos la instancia actual
+            objectOut.close();
+            fileOut.close();
+            System.out.println("Datos guardados correctamente en beisbol.dat");
+        } catch (IOException e) {
+            System.err.println("Error al guardar datos: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    public ArrayList<User> getMisUsers() { 
+    	return misUsers; }
+    
+    public void setMisUsers(ArrayList<User> misUsers) { 
+    	this.misUsers = misUsers; }
+    
+    public static User getLoginUser() { 
+    	return getInstance().loginUser;
+    	 }
+    
+    public static void setLoginUser(User login) { 
+    	loginUser = login; }
+    
+    
+
+    public static void setControl(SerieNacional temp) {
+        control = temp;
+    }
+    public static SerieNacional getInstance() {
+        if (control == null) {
+            control = new SerieNacional();
+        }
+        return control;
     }
 }

@@ -2,6 +2,8 @@ package logical;
 
 import java.io.*;
 
+import logico.SerieNacional;
+
 public class Persistencia {
     private static final String ARCHIVO = "beisbol.dat";
 
@@ -15,12 +17,18 @@ public class Persistencia {
 
     public static void cargarDatos() {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(ARCHIVO))) {
-            Control.setControl((Control) ois.readObject());
+            SerieNacional.setControl((SerieNacional) ois.readObject());
         } catch (FileNotFoundException e) {
             // Primera ejecución, se crea con valores por defecto
             guardarDatos();
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Error al cargar datos: " + e.getMessage());
+        }
+    }
+    public static void eliminarArchivo() {
+        File archivo = new File(ARCHIVO);
+        if (archivo.exists()) {
+            archivo.delete();
         }
     }
 }
