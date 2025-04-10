@@ -1,8 +1,11 @@
 package logico;
 
+import java.io.Serializable;
 import java.time.*;
 
-public class Partido {
+public class Partido implements Serializable{
+	
+	private static final long serialVersionUID = 1L;
     private LocalDate fecha;
     private Equipo equipoLocal;
     private Equipo equipoVisita;

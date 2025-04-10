@@ -17,12 +17,19 @@ public class Persistencia {
 
     public static void cargarDatos() {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(ARCHIVO))) {
-            SerieNacional.setControl((SerieNacional) ois.readObject());
+            SerieNacional temp = (SerieNacional) ois.readObject();
+            
+            SerieNacional.setControl(temp);
+            SerieNacional.setInstance(temp);
+            if (temp.getMisUsers() != null) {
+                SerieNacional.getInstance().setMisUsers(temp.getMisUsers());
+            }
         } catch (FileNotFoundException e) {
-            // Primera ejecución, se crea con valores por defecto
-            guardarDatos();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error al cargar datos: " + e.getMessage());
+            
+            User admin = new User("Administrador", "admin", "admin123");
+            SerieNacional.getInstance().regUser(admin);
+        } catch (Exception e) {
+            System.err.println("Error al cargar: " + e.getMessage());
         }
     }
     public static void eliminarArchivo() {
@@ -31,4 +38,5 @@ public class Persistencia {
             archivo.delete();
         }
     }
+
 }

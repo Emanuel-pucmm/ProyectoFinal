@@ -104,6 +104,7 @@ public class RegistrarJugador extends JDialog {
         // BOTONES
         JButton btnRegistrar = new JButton("Registrar");
         btnRegistrar.addActionListener(e -> registrarJugador());
+        
         JButton btnCancelar = new JButton("Cancelar");
         btnCancelar.addActionListener(e -> dispose());
 
@@ -202,8 +203,11 @@ public class RegistrarJugador extends JDialog {
             }
 
             // Registrar jugador
+            
             serie.getListJugadores().add(nuevoJugador);
             equipoSeleccionado.getJugadores().add(nuevoJugador);
+            serie.agregarJugador(nuevoJugador);
+            logical.Persistencia.guardarDatos();
 
             JOptionPane.showMessageDialog(this, "Jugador registrado exitosamente!");
             dispose();

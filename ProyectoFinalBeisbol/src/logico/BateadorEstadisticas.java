@@ -1,6 +1,10 @@
 package logico;
 
-public class BateadorEstadisticas {
+import java.io.Serializable;
+
+public class BateadorEstadisticas implements Serializable{
+	
+	private static final long serialVersionUID = 1L;
 	 private int hits;
 	 private int homeRuns;
 	 private int carrerasAnotadas;

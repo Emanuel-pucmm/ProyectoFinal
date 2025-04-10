@@ -11,7 +11,7 @@ public class User implements Serializable {
     private String pass;
 
     public User(String tipo, String userName, String pass) {
-        this.tipo = "Administrador";
+        this.tipo = tipo;
         this.userName = userName;
         this.pass = hashPassword(pass);
     }

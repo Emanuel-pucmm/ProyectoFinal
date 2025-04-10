@@ -1,10 +1,11 @@
 package logico;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class Lesion {
+public class Lesion implements Serializable {
 
-    // Atributos según el UML
+	private static final long serialVersionUID = 1L;
     private String tipo;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;

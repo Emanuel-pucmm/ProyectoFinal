@@ -1,6 +1,10 @@
 package logico;
 
-public class PitcherEstadisticas {
+import java.io.Serializable;
+
+public class PitcherEstadisticas implements Serializable{
+
+	private static final long serialVersionUID = 1L;
 	private int entradasLanzadas;
     private int ponchesLanzados;
     private int strikes;
