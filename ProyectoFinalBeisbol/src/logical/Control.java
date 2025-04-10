@@ -26,9 +26,14 @@ public class Control implements Serializable {
     }
 
     public boolean confirmLogin(String username, String password) {
+        if (misUsers == null || misUsers.isEmpty()) {
+            return false;
+        }
+        
         for (User user : misUsers) {
             if (user.getUserName().equals(username) && user.checkPassword(password)) {
                 loginUser = user;
+                Persistencia.guardarDatos();
                 return true;
             }
         }

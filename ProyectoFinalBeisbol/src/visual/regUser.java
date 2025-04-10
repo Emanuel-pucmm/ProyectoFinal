@@ -8,12 +8,14 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import excepcion.UsuarioExistenteExcepcion;
 import logical.Control;
 import logical.Persistencia;
 import logical.User;
 import logico.SerieNacional;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
@@ -94,30 +96,41 @@ public class regUser extends JDialog {
 			{
 				JButton okButton = new JButton("OK");
 				okButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						if (comboBox.getSelectedIndex() == 0) {
-				            javax.swing.JOptionPane.showMessageDialog(null, 
-				                "Debe seleccionar un tipo de usuario válido", 
-				                "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-				            return;
-				        }
-						if (!textField_1.getText().equals(textField_2.getText())) {
-				            javax.swing.JOptionPane.showMessageDialog(null, 
-				                "Las contraseñas no coinciden", 
-				                "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-				            return;
-				        }
-						User user = new User(comboBox.getSelectedItem().toString(),textField.getText(),textField_1.getText());
-					    SerieNacional.getInstance().regUser(user);
-					    Persistencia.guardarDatos(); 
-					    
-					    javax.swing.JOptionPane.showMessageDialog(null, 
-					    		   "Usuario registrado exitosamente", 
-					    		   "Registro completado", 
-					    		   javax.swing.JOptionPane.INFORMATION_MESSAGE);
+				    public void actionPerformed(ActionEvent e) {
+				            // Validaciones previas
+				            if (comboBox.getSelectedIndex() == 0) {
+				                JOptionPane.showMessageDialog(null, 
+				                    "Debe seleccionar un tipo de usuario válido", 
+				                    "Error", JOptionPane.ERROR_MESSAGE);
+				                return;
+				            }
+				            
+				            if (!textField_1.getText().equals(textField_2.getText())) {
+				                JOptionPane.showMessageDialog(null, 
+				                    "Las contraseñas no coinciden", 
+				                    "Error", JOptionPane.ERROR_MESSAGE);
+				                return;
+				            }
 
-					    		dispose();
-					}
+				            // Creación del usuario
+				            User user = new User(
+				                comboBox.getSelectedItem().toString(),
+				                textField.getText(),
+				                textField_1.getText()
+				            );
+				            
+				            
+				                // Intento de registro (puede lanzar UsuarioExistenteException)
+				                SerieNacional.getInstance().regUser(user);
+				                
+				                JOptionPane.showMessageDialog(null, 
+				                    "Usuario registrado exitosamente", 
+				                    "Registro completado", 
+				                    JOptionPane.INFORMATION_MESSAGE);
+				                dispose();
+				                
+				           
+				    }
 				});
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);

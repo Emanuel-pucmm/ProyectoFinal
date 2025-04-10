@@ -2,6 +2,7 @@ package logico;
 
 import java.util.ArrayList;
 
+import excepcion.UsuarioExistenteExcepcion;
 import logical.Control;
 import logical.Persistencia;
 import logical.User;
@@ -160,15 +161,20 @@ public class SerieNacional implements Serializable{
         }
         
         // Verificar si el usuario ya existe
+        boolean existe = false;
         for (User u : misUsers) {
             if (u.getUserName().equals(user.getUserName())) {
-                return; // No permitir duplicados
+                existe = true;
+                break;
             }
         }
         
-        misUsers.add(user);
-        Persistencia.guardarDatos(); // Guardar inmediatamente
+        if (!existe) {
+            misUsers.add(user);
+            Persistencia.guardarDatos(); // Guardar inmediatamente
+        }
     }
+
     
     public ArrayList<User> getMisUsers() { 
     	return misUsers; }

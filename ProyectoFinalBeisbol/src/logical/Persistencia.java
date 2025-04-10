@@ -18,14 +18,12 @@ public class Persistencia {
     public static void cargarDatos() {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(ARCHIVO))) {
             SerieNacional temp = (SerieNacional) ois.readObject();
-            
-            SerieNacional.setControl(temp);
-            SerieNacional.setInstance(temp);
+            // Conservar todos los usuarios existentes
             if (temp.getMisUsers() != null) {
                 SerieNacional.getInstance().setMisUsers(temp.getMisUsers());
             }
         } catch (FileNotFoundException e) {
-            
+            // Primera ejecución - crear admin por defecto
             User admin = new User("Administrador", "admin", "admin123");
             SerieNacional.getInstance().regUser(admin);
         } catch (Exception e) {
