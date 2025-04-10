@@ -32,7 +32,7 @@ public class EstadisticasPartido extends JDialog {
 
     private void initUI() {
         setTitle("Partido: " + local.getNombre() + " vs " + visita.getNombre());
-        setSize(900, 600);
+        setSize(1000, 700); // Aumenté el tamaño para acomodar más columnas
         setLocationRelativeTo(null);
         setModal(true);
 
@@ -45,8 +45,8 @@ public class EstadisticasPartido extends JDialog {
 
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        // Tabla equipo local
-        modelLocal = new DefaultTableModel(new Object[]{"Nombre", "Posición", "Hits", "Turnos"}, 0);
+        // Tabla equipo local - Añadí columnas para estadísticas de pitchers
+        modelLocal = new DefaultTableModel(new Object[]{"Nombre", "Posición", "Hits", "Turnos", "Ponches", "Entradas", "EF"}, 0);
         actualizarTabla(modelLocal, local);
         JTable tablaLocal = new JTable(modelLocal);
         tablaLocal.addMouseListener(new MouseAdapter() {
@@ -58,14 +58,17 @@ public class EstadisticasPartido extends JDialog {
                     if (jugador instanceof Bateador) {
                         new EditarEstadisticasBateador((Bateador) jugador).setVisible(true);
                         actualizarTabla(modelLocal, local);
+                    } else if (jugador instanceof Pitcher) {
+                        new EditarEstadisticasPitcher((Pitcher) jugador).setVisible(true);
+                        actualizarTabla(modelLocal, local);
                     }
                 }
             }
         });
         tabbedPane.addTab(local.getNombre(), new JScrollPane(tablaLocal));
 
-        // Tabla equipo visita
-        modelVisita = new DefaultTableModel(new Object[]{"Nombre", "Posición", "Hits", "Turnos"}, 0);
+        // Tabla equipo visita - Añadí columnas para estadísticas de pitchers
+        modelVisita = new DefaultTableModel(new Object[]{"Nombre", "Posición", "Hits", "Turnos", "Ponches", "Entradas", "EF"}, 0);
         actualizarTabla(modelVisita, visita);
         JTable tablaVisita = new JTable(modelVisita);
         tablaVisita.addMouseListener(new MouseAdapter() {
@@ -76,6 +79,9 @@ public class EstadisticasPartido extends JDialog {
                     Jugador jugador = visita.getJugadores().get(row);
                     if (jugador instanceof Bateador) {
                         new EditarEstadisticasBateador((Bateador) jugador).setVisible(true);
+                        actualizarTabla(modelVisita, visita);
+                    } else if (jugador instanceof Pitcher) {
+                        new EditarEstadisticasPitcher((Pitcher) jugador).setVisible(true);
                         actualizarTabla(modelVisita, visita);
                     }
                 }
@@ -108,7 +114,20 @@ public class EstadisticasPartido extends JDialog {
                     bateador.getNombre(),
                     bateador.getPosicion(),
                     bateador.getStatsBateador().getHits(),
-                    bateador.getStatsBateador().getTurnosAlBate()
+                    bateador.getStatsBateador().getTurnosAlBate(),
+                    0, // Ponches para bateadores
+                    0, // Entradas para bateadores
+                    0.0f // EF para bateadores
+                });
+            } else if (jugador instanceof Pitcher) {
+                Pitcher pitcher = (Pitcher) jugador;
+                model.addRow(new Object[]{
+                    pitcher.getNombre(),
+                    0, // Hits para pitchers
+                    0, // Turnos para pitchers
+                    pitcher.getStatsPitcher().getPonchesLanzados(),
+                    pitcher.getStatsPitcher().getEntradasLanzadas(),
+                    String.format("%.2f", pitcher.getStatsPitcher().calcEfectividad()) // Formateado a 2 decimales
                 });
             }
         }
@@ -118,10 +137,14 @@ public class EstadisticasPartido extends JDialog {
         Random rand = new Random();
         int hitsLocal = rand.nextInt(5);
         int hitsVisita = rand.nextInt(5);
+        int ponchesLocal = rand.nextInt(3); // Ponches del pitcher local
+        int ponchesVisita = rand.nextInt(3); // Ponches del pitcher visita
+        int carrerasPermitidasLocal = rand.nextInt(3); // Carreras permitidas por pitcher local
+        int carrerasPermitidasVisita = rand.nextInt(3); // Carreras permitidas por pitcher visita
 
         // Actualizar stats
-        actualizarEstadisticas(local, hitsLocal);
-        actualizarEstadisticas(visita, hitsVisita);
+        actualizarEstadisticas(local, hitsLocal, ponchesVisita, carrerasPermitidasVisita);
+        actualizarEstadisticas(visita, hitsVisita, ponchesLocal, carrerasPermitidasLocal);
 
         // 3 hits = 1 carrera
         carrerasLocal += hitsLocal / 3;
@@ -138,8 +161,10 @@ public class EstadisticasPartido extends JDialog {
         }
     }
 
-    private void actualizarEstadisticas(Equipo equipo, int hits) {
+    private void actualizarEstadisticas(Equipo equipo, int hits, int ponches, int carrerasPermitidas) {
         Random rand = new Random();
+        
+        // Actualizar bateadores (hits)
         for (int i = 0; i < hits; i++) {
             int index = rand.nextInt(equipo.getJugadores().size());
             Jugador jugador = equipo.getJugadores().get(index);
@@ -149,6 +174,18 @@ public class EstadisticasPartido extends JDialog {
                 bateador.getStatsBateador().actualizarTurnosAlBate(1);
             }
         }
+        
+        // Actualizar pitchers (ponches, entradas y carreras permitidas)
+        for (Jugador jugador : equipo.getJugadores()) {
+            if (jugador instanceof Pitcher) {
+                Pitcher pitcher = (Pitcher) jugador;
+                pitcher.getStatsPitcher().actualizarPonches(ponches);
+                pitcher.getStatsPitcher().actualizarEntradasLanzadas(1); // 1 entrada por inning
+                pitcher.getStatsPitcher().actualizarCarrerasPermitidas(carrerasPermitidas);
+                pitcher.getStatsPitcher().actualizarJuegosJugados(1);
+                break; // Solo el primer pitcher encontrado
+            }
+        }
     }
 
     public void finalizarPartido() {
@@ -156,9 +193,15 @@ public class EstadisticasPartido extends JDialog {
         if (carrerasLocal > carrerasVisita) {
             local.actualizarRecord(1, 0);
             visita.actualizarRecord(0, 1);
+            
+            // Actualizar juegos ganados/perdidos de los pitchers
+            actualizarJuegosPitchers(local, visita);
         } else if (carrerasVisita > carrerasLocal) {
             local.actualizarRecord(0, 1);
             visita.actualizarRecord(1, 0);
+            
+            // Actualizar juegos ganados/perdidos de los pitchers
+            actualizarJuegosPitchers(visita, local);
         } else {
             // Empate - simular innings extra hasta que haya un ganador
             simularInning();
@@ -171,6 +214,23 @@ public class EstadisticasPartido extends JDialog {
                 local.getNombre() + " " + carrerasLocal + " - " + 
                 visita.getNombre() + " " + carrerasVisita);
             dispose();
+        }
+    }
+
+    private void actualizarJuegosPitchers(Equipo ganador, Equipo perdedor) {
+        // Buscar pitchers abridores (simplificado - en realidad debería ser el pitcher de decisión)
+        for (Jugador jugador : ganador.getJugadores()) {
+            if (jugador instanceof Pitcher) {
+                ((Pitcher) jugador).getStatsPitcher();
+                break;
+            }
+        }
+        
+        for (Jugador jugador : perdedor.getJugadores()) {
+            if (jugador instanceof Pitcher) {
+                ((Pitcher) jugador).getStatsPitcher();
+                break;
+            }
         }
     }
 
