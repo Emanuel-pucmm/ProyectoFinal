@@ -114,11 +114,11 @@ public class Login extends JFrame {
 		JButton btnLogin = new JButton("Login");
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(SerieNacional.getInstance().confirmLogin(textField.getText(),textField_1.getText())){
-					VisualPrincipal frame = new VisualPrincipal();
-					dispose();
-					frame.setVisible(true);
-				};
+				if (SerieNacional.getInstance().confirmLogin(textField.getText(), textField_1.getText())) {
+					   VisualPrincipal frame = new VisualPrincipal();
+					   dispose();
+					   frame.setVisible(true);
+					}
 				
 			}
 		});

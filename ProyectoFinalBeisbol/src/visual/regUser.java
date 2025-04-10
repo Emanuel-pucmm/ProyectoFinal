@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import logical.Control;
+import logical.Persistencia;
 import logical.User;
 import logico.SerieNacional;
 
@@ -108,6 +109,14 @@ public class regUser extends JDialog {
 				        }
 						User user = new User(comboBox.getSelectedItem().toString(),textField.getText(),textField_1.getText());
 					    SerieNacional.getInstance().regUser(user);
+					    Persistencia.guardarDatos(); 
+					    
+					    javax.swing.JOptionPane.showMessageDialog(null, 
+					    		   "Usuario registrado exitosamente", 
+					    		   "Registro completado", 
+					    		   javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+					    		dispose();
 					}
 				});
 				okButton.setActionCommand("OK");

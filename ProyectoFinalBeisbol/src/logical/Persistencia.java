@@ -9,7 +9,7 @@ public class Persistencia {
 
     public static void guardarDatos() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ARCHIVO))) {
-            oos.writeObject(Control.getInstance());
+            oos.writeObject(SerieNacional.getInstance());
         } catch (IOException e) {
             System.err.println("Error al guardar datos: " + e.getMessage());
         }
