@@ -3,6 +3,12 @@ package visual;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.ResourceBundle.Control;
 
@@ -11,6 +17,8 @@ import logico.Equipo;
 
 public class VisualPrincipal extends JFrame {
     private SerieNacional serie;
+    private static Socket sfd = null;
+    private static DataOutputStream SalidaSocket = null;
 
 
     public VisualPrincipal() {
@@ -67,6 +75,15 @@ public class VisualPrincipal extends JFrame {
         addMenuItem(mnPartidos, "Simular Partido Manual", e -> verificarAntesDeSimularManual());
         addMenuItem(mnPartidos, "Tabla de Posiciones", e -> verificarAntesDeMostrarTabla());
         menuBar.add(mnPartidos);
+        
+        JMenu mnRespaldo = new JMenu("Respaldo");
+        JMenuItem mntmRespaldo = new JMenuItem("Generar Respaldo");
+        mntmRespaldo.addActionListener(e -> generarRespaldo());
+        mnRespaldo.add(mntmRespaldo);
+        menuBar.add(mnRespaldo);
+        
+        setJMenuBar(menuBar);
+      
 
         setJMenuBar(menuBar);
         if (SerieNacional.getLoginUser() != null) {
@@ -149,6 +166,45 @@ public class VisualPrincipal extends JFrame {
             ex.printStackTrace();
             showError("Ocurrió una excepción al abrir la ventana de lesiones: " + ex.getMessage());
         }
+    }
+    private void generarRespaldo() {
+        new Thread(() -> {
+            try {
+                sfd = new Socket("localhost", 7000); // Conexión automática
+                DataInputStream aux = new DataInputStream(new FileInputStream("beisbol.dat"));
+                SalidaSocket = new DataOutputStream(sfd.getOutputStream());
+                
+                int unByte;
+                while ((unByte = aux.read()) != -1) {
+                    SalidaSocket.write(unByte);
+                    SalidaSocket.flush();
+                }
+                
+                aux.close();
+                JOptionPane.showMessageDialog(this, 
+                    "Respaldo generado exitosamente", 
+                    "Respaldo", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                
+            } catch (UnknownHostException uhe) {
+                JOptionPane.showMessageDialog(this, 
+                    "Servidor no encontrado: " + uhe.getMessage(), 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            } catch (IOException ioe) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error de comunicación: " + ioe.getMessage(), 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            } finally {
+                try {
+                    if (SalidaSocket != null) SalidaSocket.close();
+                    if (sfd != null) sfd.close();
+                } catch (IOException e) {
+                    System.err.println("Error al cerrar conexión: " + e.getMessage());
+                }
+            }
+        }).start();
     }
 
     /**
